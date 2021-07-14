@@ -18,12 +18,14 @@ public class MainActivity extends AppCompatActivity {
     private static final String CLIENT_ID = "496eef6c993a4b4a98c9402893592d15";
     public static final String REST_URL = "https://api.twitter.com/1.1";
     //public static final String REST_CONSUMER_KEY = BuildConfig.CONSUMER_KEY;       // Change this inside apikey.properties
-    public static final String CLIENT_SECRET = "d205429158b841f7bd4cbab194b70d26"; // Change this inside apikey.properties
+     // Change this inside apikey.properties
 
     // Landing page to indicate the OAuth flow worked in case Chrome for Android 25+ blocks navigation back to the app.
     public static final String FALLBACK_URL = "https://codepath.github.io/android-rest-client-template/success.html";
 
     private SpotifyAppRemote mSpotifyAppRemote;
+
+    // testing github commits
 
 
     @Override
