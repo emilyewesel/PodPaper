@@ -2,17 +2,40 @@ package com.example.podpaper4;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 
+//import com.android.volley.AuthFailureError;
+//import com.android.volley.Request;
+//import com.android.volley.RequestQueue;
+//import com.android.volley.toolbox.JsonObjectRequest;
+import com.google.gson.Gson;
 import com.spotify.android.appremote.api.ConnectionParams;
 import com.spotify.android.appremote.api.Connector;
+import com.spotify.android.appremote.api.PlayerApi;
 import com.spotify.android.appremote.api.SpotifyAppRemote;
 
+import com.spotify.protocol.client.CallResult;
+import com.spotify.protocol.client.Result;
 import com.spotify.protocol.client.Subscription;
+import com.spotify.protocol.types.ListItems;
 import com.spotify.protocol.types.PlayerState;
 import com.spotify.protocol.types.Track;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
     private static final String CLIENT_ID = "496eef6c993a4b4a98c9402893592d15";
@@ -25,6 +48,11 @@ public class MainActivity extends AppCompatActivity {
 
     private SpotifyAppRemote mSpotifyAppRemote;
 
+    private RecyclerView rvPodcasts;
+    private List<Podcast> podcasts;
+    private PodcastsAdapter mAdapter;
+    private SharedPreferences sharedPreferences;
+    //private RequestQueue queue;
     // testing github commits
 
 
@@ -32,6 +60,26 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        rvPodcasts = findViewById(R.id.rvPodcasts);
+
+        // allows for optimizations
+        rvPodcasts.setHasFixedSize(true);
+
+        // Define 2 column grid layout
+        final GridLayoutManager layout = new GridLayoutManager(MainActivity.this, 2);
+
+        // Unlike ListView, you have to explicitly give a LayoutManager to the RecyclerView to position items on the screen.
+        // There are three LayoutManager provided at the moment: GridLayoutManager, StaggeredGridLayoutManager and LinearLayoutManager.
+        rvPodcasts.setLayoutManager(layout);
+
+        // get data
+        podcasts = Podcast.getPodcasts();
+
+        // Create an adapter
+        mAdapter = new PodcastsAdapter(MainActivity.this, podcasts);
+
+        // Bind adapter to list
+        rvPodcasts.setAdapter(mAdapter);
     }
 
     @Override
@@ -68,17 +116,78 @@ public class MainActivity extends AppCompatActivity {
 
     private void connected() {
         //this next line starts playing a certain playlist!!
-        mSpotifyAppRemote.getPlayerApi().play("spotify:playlist:37i9dQZF1DX2sUQwD7tbmL");
-        mSpotifyAppRemote.getPlayerApi()
+        //https:
+//open.spotify.com/playlist/4ZgA4n77UZUqnzcly8siL4?uid=61c622228e63b298
+      //  mSpotifyAppRemote.getPlayerApi().play("spotify:playlist:4ZgA4n77UZUqnzcly8siL4");
+
+        URI temp = URI.create("spotify:playlist:4ZgA4n77UZUqnzcly8siL4");
+        CallResult<ListItems> tempy = mSpotifyAppRemote.getContentApi().getRecommendedContentItems("playlist");
+    mSpotifyAppRemote.getPlayerApi()
                 .subscribeToPlayerState()
                 .setEventCallback(playerState -> {
                     final Track track = playerState.track;
+                    //Podcast pod = new Podcast(track.name, track.imageUri, track.artist, track.album);
                     if (track != null) {
                         Log.d("MainActivity", track.name + " by " + track.artist.name);
                     }
                 });
+        PlayerApi playerApi = mSpotifyAppRemote.getPlayerApi();
+        CallResult<PlayerState> playerStateCall = playerApi.getPlayerState();
+        Result<PlayerState> playerStateResult = playerStateCall.await(10, TimeUnit.SECONDS);
+        if (playerStateResult.isSuccessful()) {
+            PlayerState playerState = playerStateResult.getData();
+            // have some fun with playerState
+        } else {
+            Throwable error = playerStateResult.getError();
+            // try to have some fun with the error
+        }
         // Then we will write some more code here.
+
     }
+
+
+    /*public interface VolleyCallBack {
+
+        void onSuccess();
+    }
+
+     */
+    /*public List<Podcast> getRecentlyPlayedTracks(final VolleyCallBack callBack) {
+        String endpoint = "https://api.spotify.com/v1/me/player/recently-played";
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
+                (Request.Method.GET, endpoint, null, response -> {
+                    Gson gson = new Gson();
+                    JSONArray jsonArray = response.optJSONArray("items");
+                    for (int n = 0; n < jsonArray.length(); n++) {
+                        try {
+                            JSONObject object = jsonArray.getJSONObject(n);
+                            object = object.optJSONObject("track");
+                            Podcast podcast = gson.fromJson(object.toString(), Podcast.class);
+                            podcasts.add(podcast);
+                            Log.e("HI EVERYONE!!!", "THINGS R WORKING");
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    callBack.onSuccess();
+                }, error -> {
+                    // TODO: Handle error
+
+                }) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = new HashMap<>();
+                String token = sharedPreferences.getString("token", "");
+                String auth = "Bearer " + token;
+                headers.put("Authorization", auth);
+                return headers;
+            }
+        };
+        queue.add(jsonObjectRequest);
+        return podcasts;
+        }
+     */
+
 
     @Override
     protected void onStop() {
