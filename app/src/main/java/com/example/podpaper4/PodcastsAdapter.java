@@ -2,6 +2,9 @@ package com.example.podpaper4;
 
 import android.app.Activity;
 import android.content.Context;
+import android.database.Cursor;
+import android.net.Uri;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,7 +15,11 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.spotify.protocol.types.ImageUri;
+import com.squareup.picasso.Picasso;
 
+import java.io.File;
+import java.net.URI;
 import java.util.List;
 
 public class PodcastsAdapter extends RecyclerView.Adapter<PodcastsAdapter.VH> {
@@ -40,8 +47,14 @@ public class PodcastsAdapter extends RecyclerView.Adapter<PodcastsAdapter.VH> {
         Podcast podcast = mPodcasts.get(position);
         holder.rootView.setTag(podcast);
         holder.tvName.setText(podcast.getTitle());
-        Glide.with(mContext).load(podcast.getThumbnailDrawable()).centerCrop().into(holder.ivProfile);
+        //Log.e("Hi this is emily!!", podcast.getThumbnailDrawable().getPath());
+        //ImageUri u = podcast.getThumbnailDrawable();
+        //Log.e("emily emily emily");
+        holder.ivProfile.setImageBitmap(podcast.getThumbnailDrawable());
+        //Picasso.get().load(u).into(holder.ivProfile);
+        //Glide.with(mContext).load(u).centerCrop().into(holder.ivProfile);
     }
+
 
     @Override
     public int getItemCount() {

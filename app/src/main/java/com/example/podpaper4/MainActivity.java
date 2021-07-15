@@ -6,6 +6,8 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -22,6 +24,8 @@ import com.spotify.android.appremote.api.SpotifyAppRemote;
 import com.spotify.protocol.client.CallResult;
 import com.spotify.protocol.client.Result;
 import com.spotify.protocol.client.Subscription;
+import com.spotify.protocol.types.Image;
+import com.spotify.protocol.types.ImageUri;
 import com.spotify.protocol.types.ListItems;
 import com.spotify.protocol.types.PlayerState;
 import com.spotify.protocol.types.Track;
@@ -30,10 +34,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+//import java.net.URI;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -126,22 +132,47 @@ public class MainActivity extends AppCompatActivity {
                 .subscribeToPlayerState()
                 .setEventCallback(playerState -> {
                     final Track track = playerState.track;
-                    //Podcast pod = new Podcast(track.name, track.imageUri, track.artist, track.album);
+                    Uri u = Uri.parse(track.imageUri.raw);
+                    u.getPath();
+                    Log.e("Hi this is emily!!", u.toString());
+                    ImageUri image = track.imageUri;
+
+                    mSpotifyAppRemote
+                            .getImagesApi()
+                            .getImage(playerState.track.imageUri)
+                            .setResultCallback(
+                            bitmap -> {
+                                Podcast pod = new Podcast(track.name, bitmap, track.artist.toString(), track.album.toString());
+
+
+                                podcasts.add(pod);
+                                podcasts.add(pod);
+                                podcasts.add(pod);
+                                mAdapter.notifyDataSetChanged();
+
+                            });
+
+
                     if (track != null) {
                         Log.d("MainActivity", track.name + " by " + track.artist.name);
                     }
                 });
+
         PlayerApi playerApi = mSpotifyAppRemote.getPlayerApi();
         CallResult<PlayerState> playerStateCall = playerApi.getPlayerState();
         Result<PlayerState> playerStateResult = playerStateCall.await(10, TimeUnit.SECONDS);
         if (playerStateResult.isSuccessful()) {
             PlayerState playerState = playerStateResult.getData();
+            mSpotifyAppRemote
+                    .getImagesApi()
+                    .getImage(playerState.track.imageUri, Image.Dimension.LARGE);
             // have some fun with playerState
         } else {
             Throwable error = playerStateResult.getError();
             // try to have some fun with the error
         }
         // Then we will write some more code here.
+
 
     }
 
