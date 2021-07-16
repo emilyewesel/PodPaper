@@ -41,6 +41,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
 import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
@@ -126,8 +127,8 @@ public class MainActivity extends AppCompatActivity {
 //open.spotify.com/playlist/4ZgA4n77UZUqnzcly8siL4?uid=61c622228e63b298
       //  mSpotifyAppRemote.getPlayerApi().play("spotify:playlist:4ZgA4n77UZUqnzcly8siL4");
 
-        URI temp = URI.create("spotify:playlist:4ZgA4n77UZUqnzcly8siL4");
-        CallResult<ListItems> tempy = mSpotifyAppRemote.getContentApi().getRecommendedContentItems("playlist");
+        //URI temp = URI.create("spotify:playlist:4ZgA4n77UZUqnzcly8siL4");
+        //CallResult<ListItems> tempy = mSpotifyAppRemote.getContentApi().getRecommendedContentItems("playlist");
     mSpotifyAppRemote.getPlayerApi()
                 .subscribeToPlayerState()
                 .setEventCallback(playerState -> {
@@ -142,11 +143,9 @@ public class MainActivity extends AppCompatActivity {
                             .getImage(playerState.track.imageUri)
                             .setResultCallback(
                             bitmap -> {
-                                Podcast pod = new Podcast(track.name, bitmap, track.artist.toString(), track.album.toString());
+                                Podcast pod = new Podcast(track.name, bitmap, track.artist.toString(), track.album.toString(), track.uri);
 
 
-                                podcasts.add(pod);
-                                podcasts.add(pod);
                                 podcasts.add(pod);
                                 mAdapter.notifyDataSetChanged();
 

@@ -2,7 +2,9 @@ package com.example.podpaper4;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -17,6 +19,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.spotify.protocol.types.ImageUri;
 import com.squareup.picasso.Picasso;
+
+import org.parceler.Parcels;
 
 import java.io.File;
 import java.net.URI;
@@ -81,12 +85,27 @@ public class PodcastsAdapter extends RecyclerView.Adapter<PodcastsAdapter.VH> {
                 public void onClick(View v) {
                     final Podcast contact = (Podcast) v.getTag();
                     if (contact != null) {
+                        int position = getAdapterPosition();
+                        //The function getAdapterPosition tells us what movie the user is clicking on,
+                        // that way we can pass the information to the next activity using intent.putExtra
+                        if (position >=0 && position < mPodcasts.size()){
+                            Podcast pod = mPodcasts.get(position);
+                            Intent intent = new Intent(mContext, PodcastDetailsActivity.class);
+                            Log.e("We are looking at the podcast ", "pod: "+ pod.getTitle());
+                            //here we put the relevant movie the intent so that we can show the details of it later
+                            pod.setImage(Bitmap.createScaledBitmap(pod.getThumbnailDrawable(), 300, 300, true));
+                            intent.putExtra("pod", Parcels.wrap(pod));
+                            mContext.startActivity(intent);
+                        }
                         // Fire an intent when a contact is selected
                         // Pass contact object in the bundle and populate details activity.
                     }
                 }
             });
         }
+
     }
+
+
 }
 

@@ -20,6 +20,8 @@
             android:id="@+id/ivProfile"
             android:layout_width="match_parent"
             android:layout_height="@dimen/grid_profile_height"
+            android:maxWidth="200dp"
+            android:maxHeight="200dp"
             android:scaleType="centerCrop" />
 
         <RelativeLayout
