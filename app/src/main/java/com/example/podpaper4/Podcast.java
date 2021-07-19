@@ -94,6 +94,10 @@ public class Podcast implements Parcelable {
 
     public String getAuthor(){return mAuthor;}
 
+    public String getmUri(){
+        return mUri;
+    }
+
     // Returns a list of contacts
     public static List<Podcast> getPodcasts() {
         List<Podcast> podcasts = new ArrayList<>();

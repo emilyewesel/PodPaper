@@ -16,6 +16,7 @@ import android.util.Log;
 //import com.android.volley.RequestQueue;
 //import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.gson.Gson;
+import com.parse.Parse;
 import com.spotify.android.appremote.api.ConnectionParams;
 import com.spotify.android.appremote.api.Connector;
 import com.spotify.android.appremote.api.PlayerApi;
@@ -87,6 +88,13 @@ public class MainActivity extends AppCompatActivity {
 
         // Bind adapter to list
         rvPodcasts.setAdapter(mAdapter);
+
+        Parse.initialize(new Parse.Configuration.Builder(this)
+                .applicationId("aK4kNVy74NqUcpXO1AYezHdY7YmSU7YyyFMr9MOP")
+                .clientKey("4V0CoiSO45wDWjAoetdE80q5DJPW4pyF2xSxqjmN")
+                .server("https://parseapi.back4app.com")
+                .build()
+        );
     }
 
     @Override
@@ -143,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
                             .getImage(playerState.track.imageUri)
                             .setResultCallback(
                             bitmap -> {
-                                Podcast pod = new Podcast(track.name, bitmap, track.artist.toString(), track.album.toString(), track.uri);
+                                Podcast pod = new Podcast(track.name, bitmap, track.album.toString(), track.artist.name, track.uri);
 
 
                                 podcasts.add(pod);

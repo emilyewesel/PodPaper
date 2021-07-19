@@ -32,6 +32,8 @@ dependencies {
     implementation files('../libs/spotify-app-remote-release-0.7.2.aar')
 
     implementation files('../libs/spotify-app-remote-release-0.7.2.aar')
+    implementation "com.github.parse-community.Parse-SDK-Android:parse:1.18.5"
+
 
     //implementation project(':spotify-app-remote')
     implementation "androidx.cardview:cardview:1.0.0"
