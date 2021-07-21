@@ -5,11 +5,14 @@ import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Toast;
 
 //import com.android.volley.AuthFailureError;
 //import com.android.volley.Request;
@@ -17,6 +20,11 @@ import android.util.Log;
 //import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.gson.Gson;
 import com.parse.Parse;
+import com.parse.ParseException;
+import com.parse.ParseFile;
+import com.parse.ParseObject;
+import com.parse.ParseUser;
+import com.parse.SaveCallback;
 import com.spotify.android.appremote.api.ConnectionParams;
 import com.spotify.android.appremote.api.Connector;
 import com.spotify.android.appremote.api.PlayerApi;
@@ -36,6 +44,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 //import java.net.URI;
+import java.io.ByteArrayOutputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -81,7 +90,8 @@ public class MainActivity extends AppCompatActivity {
         rvPodcasts.setLayoutManager(layout);
 
         // get data
-        podcasts = Podcast.getPodcasts();
+        podcasts = new ArrayList<>();
+        //podcasts = Podcast.getPodcasts();
 
         // Create an adapter
         mAdapter = new PodcastsAdapter(MainActivity.this, podcasts);
@@ -95,12 +105,6 @@ public class MainActivity extends AppCompatActivity {
                 .server("https://parseapi.back4app.com")
                 .build()
         );
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-
 
         ConnectionParams connectionParams =
                 new ConnectionParams.Builder(CLIENT_ID)
@@ -126,6 +130,14 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
 
+
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
         // We will start writing our code here.
     }
 
@@ -146,19 +158,49 @@ public class MainActivity extends AppCompatActivity {
                     Log.e("Hi this is emily!!", u.toString());
                     ImageUri image = track.imageUri;
 
+                    Toast.makeText(MainActivity.this, "Trying to make post!!!", Toast.LENGTH_SHORT).show();
                     mSpotifyAppRemote
                             .getImagesApi()
                             .getImage(playerState.track.imageUri)
                             .setResultCallback(
                             bitmap -> {
-                                Podcast pod = new Podcast(track.name, bitmap, track.album.toString(), track.artist.name, track.uri);
+                                Log.e("TAG", "setting up the podcast");
+                                Podcast pod = new Podcast();
+                                ParseUser currentUser = ParseUser.getCurrentUser();
+                                pod.setUser(currentUser);
+
+                                Log.e("TAG", "setting up the podcast for real");
+                                //pod.setSelfie(null);
+                                //convert bitmap to File
+
+                                pod.setTitle(track.name);
+                                pod.setAuthor(track.artist.name);
+                                pod.setAlbumCover(conversionBitmapParseFile(bitmap));
+
+                                //pod.setUri(track.uri);
+                                //pod.setBitmap(bitmap);
+                                //pod.setUser(currentUser);
+                                Toast.makeText(MainActivity.this, "Trying to save post for real!!!", Toast.LENGTH_SHORT).show();
+                                Log.e("TAG", "setting up the podcast for real 2");
+                                pod.saveInBackground(new SaveCallback() {
+                                    @Override
+                                    public void done(ParseException e) {
+                                        if (e != null){
+                                            Log.e("ERORR!!! " + e," Toast.LENGTH_SHORT");
+                                            Toast.makeText(MainActivity.this, "ERORR!!! " + e, Toast.LENGTH_SHORT).show();
+                                        }
+
+                                        Log.i("TAG", "save was successful");
+                                        podcasts.add(pod);
+                                        mAdapter.notifyDataSetChanged();
+                                        Log.e("MainActivity!", "done setting up the podcast");
+                                    }
+                                });
+                                //Podcast pod = new Podcast(track.name, bitmap, track.album.toString(), track.artist.name, track.uri);
 
 
-                                podcasts.add(pod);
-                                mAdapter.notifyDataSetChanged();
 
                             });
-
 
                     if (track != null) {
                         Log.d("MainActivity", track.name + " by " + track.artist.name);
@@ -182,7 +224,6 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
-
 
     /*public interface VolleyCallBack {
 
@@ -226,7 +267,20 @@ public class MainActivity extends AppCompatActivity {
         }
      */
 
+    public ParseFile conversionBitmapParseFile(Bitmap imageBitmap){
+        ByteArrayOutputStream byteArrayOutputStream=new ByteArrayOutputStream();
+        imageBitmap.compress(Bitmap.CompressFormat.PNG,100,byteArrayOutputStream);
+        byte[] imageByte = byteArrayOutputStream.toByteArray();
+        ParseFile parseFile = new ParseFile("image_file.png",imageByte);
+        return parseFile;
+    }
 
+    public void handleLogOut(View view){
+        ParseUser.logOut();
+        ParseUser currentUser = ParseUser.getCurrentUser(); // this will now be null
+        Intent i = new Intent(MainActivity.this, LoginActivity.class);
+        startActivity(i);
+    }
     @Override
     protected void onStop() {
         super.onStop();

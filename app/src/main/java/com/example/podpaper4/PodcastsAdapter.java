@@ -54,9 +54,15 @@ public class PodcastsAdapter extends RecyclerView.Adapter<PodcastsAdapter.VH> {
         //Log.e("Hi this is emily!!", podcast.getThumbnailDrawable().getPath());
         //ImageUri u = podcast.getThumbnailDrawable();
         //Log.e("emily emily emily");
-        holder.ivProfile.setImageBitmap(podcast.getThumbnailDrawable());
+
+        //Bitmap b = new Bitmap(podcast.getBitmap());
+        //holder.ivProfile.setImageBitmap((Bitmap)(podcast.getBitmap()));
         //Picasso.get().load(u).into(holder.ivProfile);
-        //Glide.with(mContext).load(u).centerCrop().into(holder.ivProfile);
+        Log.e("Adapter", "trying to set the image to the bitmap");
+        String imageUrl = podcast.getAlbumCover().getUrl();
+
+        Picasso.get().load(imageUrl).into(holder.ivProfile);
+        //Glide.with(mContext).load(podcast.getAlbumCover().g).centerCrop().into(holder.ivProfile);
     }
 
 
@@ -93,7 +99,7 @@ public class PodcastsAdapter extends RecyclerView.Adapter<PodcastsAdapter.VH> {
                             Intent intent = new Intent(mContext, PodcastDetailsActivity.class);
                             Log.e("We are looking at the podcast ", "pod: "+ pod.getTitle());
                             //here we put the relevant movie the intent so that we can show the details of it later
-                            pod.setImage(Bitmap.createScaledBitmap(pod.getThumbnailDrawable(), 300, 300, true));
+                            //pod.setBitmap(Bitmap.createScaledBitmap(pod.getBitmap(), 300, 300, true));
                             intent.putExtra("pod", Parcels.wrap(pod));
                             mContext.startActivity(intent);
                         }
