@@ -12,6 +12,8 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -44,6 +46,7 @@ public class PodcastDetailsActivity extends AppCompatActivity {
     private ImageView imageDetails;
     private TextView titleDetails;
     private TextView captionDetails;
+    private TextView tapText;
     File photoFile;
     private SpotifyAppRemote mSpotifyAppRemote;
     private String uri;
@@ -73,6 +76,7 @@ public class PodcastDetailsActivity extends AppCompatActivity {
         captionDetails = findViewById(R.id.captionDetail);
         takePic = findViewById(R.id.takePicture);
         selfie = findViewById(R.id.selfie);
+        tapText = findViewById(R.id.tapText);
 
         pod = (Podcast) Parcels.unwrap(getIntent().getParcelableExtra("pod"));
 
@@ -101,6 +105,23 @@ public class PodcastDetailsActivity extends AppCompatActivity {
         else{
             Log.e("no selfie :/", "emily");
         }
+
+        tapText.setOnTouchListener(new View.OnTouchListener() {
+            private GestureDetector gestureDetector = new GestureDetector(PodcastDetailsActivity.this, new GestureDetector.SimpleOnGestureListener() {
+                @Override
+                public boolean onDoubleTap(MotionEvent e) {
+                    Toast.makeText(PodcastDetailsActivity.this, "EMILY!!!", Toast.LENGTH_SHORT).show();
+                    Log.d("TEST", "onDoubleTap");
+                    return super.onDoubleTap(e);
+                }
+            });
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                Log.d("TEST", "Raw event: " + event.getAction() + ", (" + event.getRawX() + ", " + event.getRawY() + ")");
+                gestureDetector.onTouchEvent(event);
+                return true;
+            }
+        });
 
         takePic.setOnClickListener(new View.OnClickListener() {
             @Override
