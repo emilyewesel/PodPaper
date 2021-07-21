@@ -177,7 +177,7 @@ public class MainActivity extends AppCompatActivity {
                                 pod.setAuthor(track.artist.name);
                                 pod.setAlbumCover(conversionBitmapParseFile(bitmap));
 
-                                //pod.setUri(track.uri);
+                                pod.setUri(track.uri);
                                 //pod.setBitmap(bitmap);
                                 //pod.setUser(currentUser);
                                 Toast.makeText(MainActivity.this, "Trying to save post for real!!!", Toast.LENGTH_SHORT).show();

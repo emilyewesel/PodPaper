@@ -84,6 +84,9 @@ public class PodcastDetailsActivity extends AppCompatActivity {
         titleDetails.setText(pod.getTitle());
         captionDetails.setText(pod.getAuthor());
         uri = pod.getUri();
+//        ParseQuery<Podcast> query = ParseQuery.getQuery(Podcast.class);
+//
+//        query.findInBackground();
 
 
         String imageUrl = pod.getAlbumCover().getUrl();
@@ -97,6 +100,8 @@ public class PodcastDetailsActivity extends AppCompatActivity {
 //        }
 
 
+
+
         if (pod.getSelfie() != null){
             Log.e("I HAVE A SELFIE I WANT TO SHARE", "by emily");
             //BitmapFactory.decodeFile(photoFile.getAbsolutePath());
@@ -105,6 +110,7 @@ public class PodcastDetailsActivity extends AppCompatActivity {
         else{
             Log.e("no selfie :/", "emily");
         }
+
 
         tapText.setOnTouchListener(new View.OnTouchListener() {
             private GestureDetector gestureDetector = new GestureDetector(PodcastDetailsActivity.this, new GestureDetector.SimpleOnGestureListener() {
@@ -152,46 +158,46 @@ public class PodcastDetailsActivity extends AppCompatActivity {
     }
 
     private void queryPods() {
-        // specify what type of data we want to query - Post.class
-        ParseQuery<Podcast> query = ParseQuery.getQuery(Podcast.class);
-        // include data referred by user key
-        query.include(Podcast.KEY_TITLE);
-        query.include(Podcast.KEY_USER);
-        // limit query to latest 20 items
-        query.setLimit(20);
-        // order posts by creation date (newest first)
-        query.addDescendingOrder("createdAt");
-        // start an asynchronous call for posts
-        query.findInBackground(new FindCallback<Podcast>() {
-            @Override
-            public void done(List<Podcast> pods, ParseException e) {
-                // check for errors
-                if (e != null) {
-                    Log.e("TAG", "Issue with getting posts", e);
-                    return;
-                }
-
-                // for debugging purposes let's print every post description to logcat
-                for (Podcast podd : pods) {
-                    if (podd.getObjectId().equals(pod.getObjectId())){
-                        //selfiePic = podd.getSelfie();
-                        Log.e("selfie pic isss ", "" +pod.getSelfie() + pod.getAuthor());
-                        //Glide.with(PodcastDetailsActivity.this).load(pod.getSelfie()).into(selfie);
-                    }
-                    else{
-                        Log.e("selfie pic is not ", "" +pod.getSelfie() + pod.getAuthor());
-                    }
-                    Log.i("TAG", "Post: " + pod.getTitle() + " " + pod.getSelfie());
-                }
-
-//                adapter.clear();
-//                allPosts.clear();
-//                // save received posts to list and notify adapter of new data
-//                allPosts.addAll(posts);
-//                adapter.notifyDataSetChanged();
-//                swipeContainer.setRefreshing(false);
-            }
-        });
+//        // specify what type of data we want to query - Post.class
+//        ParseQuery<Podcast> query = ParseQuery.getQuery(Podcast.class);
+//        // include data referred by user key
+//        query.include(Podcast.KEY_TITLE);
+//        query.include(Podcast.KEY_USER);
+//        // limit query to latest 20 items
+//        query.setLimit(20);
+//        // order posts by creation date (newest first)
+//        query.addDescendingOrder("createdAt");
+//        // start an asynchronous call for posts
+//        query.findInBackground(new FindCallback<Podcast>() {
+//            @Override
+//            public void done(List<Podcast> pods, ParseException e) {
+//                // check for errors
+//                if (e != null) {
+//                    Log.e("TAG", "Issue with getting posts", e);
+//                    return;
+//                }
+//
+//                // for debugging purposes let's print every post description to logcat
+////                for (Podcast podd : pods) {
+////                    if (podd.getObjectId().equals(pod.getObjectId())){
+////                        //selfiePic = podd.getSelfie();
+////                        Log.e("selfie pic isss ", "" +pod.getSelfie() + pod.getAuthor());
+////                        //Glide.with(PodcastDetailsActivity.this).load(pod.getSelfie()).into(selfie);
+////                    }
+////                    else{
+////                        Log.e("selfie pic is not ", "" +pod.getSelfie() + pod.getAuthor());
+////                    }
+////                    Log.i("TAG", "Post: " + pod.getTitle() + " " + pod.getSelfie());
+////                }
+//
+////                adapter.clear();
+////                allPosts.clear();
+////                // save received posts to list and notify adapter of new data
+////                allPosts.addAll(posts);
+////                adapter.notifyDataSetChanged();
+////                swipeContainer.setRefreshing(false);
+//            }
+//        });
     }
 
 
