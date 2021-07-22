@@ -19,10 +19,12 @@ import android.widget.Toast;
 //import com.android.volley.RequestQueue;
 //import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.gson.Gson;
+import com.parse.FindCallback;
 import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseObject;
+import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
 import com.spotify.android.appremote.api.ConnectionParams;
@@ -130,6 +132,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
 
+        queryPods();
 
 
     }
@@ -137,6 +140,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        queryPods();
 
         // We will start writing our code here.
     }
@@ -158,7 +162,6 @@ public class MainActivity extends AppCompatActivity {
                     Log.e("Hi this is emily!!", u.toString());
                     ImageUri image = track.imageUri;
 
-                    Toast.makeText(MainActivity.this, "Trying to make post!!!", Toast.LENGTH_SHORT).show();
                     mSpotifyAppRemote
                             .getImagesApi()
                             .getImage(playerState.track.imageUri)
@@ -180,14 +183,13 @@ public class MainActivity extends AppCompatActivity {
                                 pod.setUri(track.uri);
                                 //pod.setBitmap(bitmap);
                                 //pod.setUser(currentUser);
-                                Toast.makeText(MainActivity.this, "Trying to save post for real!!!", Toast.LENGTH_SHORT).show();
+
                                 Log.e("TAG", "setting up the podcast for real 2");
                                 pod.saveInBackground(new SaveCallback() {
                                     @Override
                                     public void done(ParseException e) {
                                         if (e != null){
                                             Log.e("ERORR!!! " + e," Toast.LENGTH_SHORT");
-                                            Toast.makeText(MainActivity.this, "ERORR!!! " + e, Toast.LENGTH_SHORT).show();
                                         }
 
                                         Log.i("TAG", "save was successful");
@@ -267,6 +269,48 @@ public class MainActivity extends AppCompatActivity {
         }
      */
 
+    private void queryPods() {
+        // specify what type of data we want to query - Post.class
+        ParseQuery<Podcast> query = ParseQuery.getQuery(Podcast.class);
+        // include data referred by user key
+        query.include(Podcast.KEY_TITLE);
+        query.include(Podcast.KEY_USER);
+        // limit query to latest 20 items
+        query.setLimit(20);
+        // order posts by creation date (newest first)
+        query.addDescendingOrder("createdAt");
+        // start an asynchronous call for posts
+        query.findInBackground(new FindCallback<Podcast>() {
+            @Override
+            public void done(List<Podcast> pods, ParseException e) {
+                // check for errors
+                if (e != null) {
+                    Log.e("TAG", "Issue with getting posts", e);
+                    return;
+                }
+
+                // for debugging purposes let's print every post description to logcat
+//                for (Podcast podd : pods) {
+//                    if (podd.getObjectId().equals(pod.getObjectId())){
+//                        //selfiePic = podd.getSelfie();
+//                        Log.e("selfie pic isss ", "" +pod.getSelfie() + pod.getAuthor());
+//                        //Glide.with(PodcastDetailsActivity.this).load(pod.getSelfie()).into(selfie);
+//                    }
+//                    else{
+//                        Log.e("selfie pic is not ", "" +pod.getSelfie() + pod.getAuthor());
+//                    }
+//                    Log.i("TAG", "Post: " + pod.getTitle() + " " + pod.getSelfie());
+//                }
+
+//                allPosts.clear();
+//                // save received posts to list and notify adapter of new data
+                podcasts.clear();
+                podcasts.addAll(pods);
+                mAdapter.notifyDataSetChanged();
+//                swipeContainer.setRefreshing(false);
+            }
+        });
+    }
     public ParseFile conversionBitmapParseFile(Bitmap imageBitmap){
         ByteArrayOutputStream byteArrayOutputStream=new ByteArrayOutputStream();
         imageBitmap.compress(Bitmap.CompressFormat.PNG,100,byteArrayOutputStream);

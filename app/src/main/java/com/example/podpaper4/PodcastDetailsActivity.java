@@ -15,11 +15,17 @@ import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.airbnb.lottie.LottieAnimationView;
 import com.bumptech.glide.Glide;
 //import com.parse.ParseObject;
 import com.parse.FindCallback;
@@ -56,6 +62,7 @@ public class PodcastDetailsActivity extends AppCompatActivity {
     private Button takePic;
     String TAG = "PodcastDetailsActivity";
     private ImageView selfie;
+    private LottieAnimationView heart;
     private Podcast pod;
     ParseFile selfiePic;
 
@@ -77,6 +84,7 @@ public class PodcastDetailsActivity extends AppCompatActivity {
         takePic = findViewById(R.id.takePicture);
         selfie = findViewById(R.id.selfie);
         tapText = findViewById(R.id.tapText);
+        heart = findViewById(R.id.heart);
 
         pod = (Podcast) Parcels.unwrap(getIntent().getParcelableExtra("pod"));
 
@@ -102,22 +110,37 @@ public class PodcastDetailsActivity extends AppCompatActivity {
 
 
 
+
         if (pod.getSelfie() != null){
             Log.e("I HAVE A SELFIE I WANT TO SHARE", "by emily");
             //BitmapFactory.decodeFile(photoFile.getAbsolutePath());
-            Glide.with(PodcastDetailsActivity.this).load(pod.getSelfie()).into(selfie);
+            Glide.with(PodcastDetailsActivity.this).load(pod.getSelfie().getUrl()).into(selfie);
+            Animation fadeIn = new AlphaAnimation(0, 1);
+            fadeIn.setInterpolator(new DecelerateInterpolator()); //add this
+            fadeIn.setDuration(1000);
+
+            Animation fadeOut = new AlphaAnimation(1, 0);
+            fadeOut.setInterpolator(new AccelerateInterpolator()); //and this
+            fadeOut.setStartOffset(1000);
+            fadeOut.setDuration(1000);
+
+            AnimationSet animation = new AnimationSet(false); //change to false
+            animation.addAnimation(fadeIn);
+            animation.addAnimation(fadeOut);
+            selfie.setAnimation(animation);
         }
         else{
             Log.e("no selfie :/", "emily");
         }
 
 
-        tapText.setOnTouchListener(new View.OnTouchListener() {
+        imageDetails.setOnTouchListener(new View.OnTouchListener() {
             private GestureDetector gestureDetector = new GestureDetector(PodcastDetailsActivity.this, new GestureDetector.SimpleOnGestureListener() {
                 @Override
                 public boolean onDoubleTap(MotionEvent e) {
-                    Toast.makeText(PodcastDetailsActivity.this, "EMILY!!!", Toast.LENGTH_SHORT).show();
                     Log.d("TEST", "onDoubleTap");
+                    heart.playAnimation();
+                    heart.setVisibility(View.VISIBLE);
                     return super.onDoubleTap(e);
                 }
             });
@@ -238,8 +261,9 @@ public class PodcastDetailsActivity extends AppCompatActivity {
     public void handlePlayPodcast(View view){
         while (true) {
             if(connected) {
-                Log.e("spotify:track:" +uri, "is somehow not the same thing as " + "spotify:track:5HCyWlXZPP0y6Gqq8TgA20" );
+                //Log.e("spotify:track:" +uri, "is somehow not the same thing as " + "spotify:track:5HCyWlXZPP0y6Gqq8TgA20" );
                 mSpotifyAppRemote.getPlayerApi().play(uri);
+                Toast.makeText(PodcastDetailsActivity.this, "Now playing " + titleDetails.getText(), Toast.LENGTH_SHORT).show();
                 break;
             }
         }

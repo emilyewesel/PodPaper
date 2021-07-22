@@ -10,6 +10,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.airbnb.lottie.Lottie;
+import com.airbnb.lottie.LottieConfig;
 import com.parse.LogInCallback;
 import com.parse.Parse;
 import com.parse.ParseException;
@@ -43,6 +45,7 @@ public class LoginActivity extends AppCompatActivity {
         passwordEt = findViewById(R.id.password);
         btnLogin = findViewById(R.id.loginButton);
         signButton = findViewById(R.id.signButton);
+
 
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -80,7 +83,6 @@ public class LoginActivity extends AppCompatActivity {
                 }
                 goMainActivity();
                 Log.e("this is ", "working!!");
-                Toast.makeText(LoginActivity.this, "hi queen", Toast.LENGTH_SHORT).show();
             }
         });
 

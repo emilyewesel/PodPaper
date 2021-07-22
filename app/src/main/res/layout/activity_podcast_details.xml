@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -13,31 +13,52 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:gravity="center"
+
         android:text="TextView" />
 
     <ImageView
+        android:layout_below="@id/titleDetail"
         android:id="@+id/imageDetail"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center"
         tools:srcCompat="@tools:sample/avatars" />
 
     <TextView
+        android:layout_below="@id/imageDetail"
         android:id="@+id/captionDetail"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:gravity="center"
         android:text="TextView" />
     <TextView
         android:id="@+id/tapText"
-        android:layout_width="match_parent"
+        android:layout_below="@id/captionDetail"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:gravity="center"
         android:text="Double Tap to Like" />
 
+    <com.airbnb.lottie.LottieAnimationView
+        android:id="@+id/heart"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginTop="0dp"
+        android:gravity="right"
+        android:layout_marginBottom="0dp"
+        android:layout_below="@id/imageDetail"
+        android:layout_toRightOf="@id/captionDetail"
+        android:visibility="invisible"
+        app:lottie_autoPlay="true"
+        app:lottie_loop="false"
+        app:lottie_url="https://assets7.lottiefiles.com/packages/lf20_xoilmeiy.json" />
+
+
     <Button
         android:id="@+id/playButton"
+        android:layout_below="@id/tapText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:onClick="handlePlayPodcast"
@@ -45,15 +66,17 @@
 
     <Button
         android:id="@+id/takePicture"
+        android:layout_below="@id/playButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Take picture with podcast" />
 
     <ImageView
         android:id="@+id/selfie"
+        android:layout_below="@id/takePicture"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         tools:src="@tools:sample/avatars" />
 
 
-</LinearLayout>
+</RelativeLayout>
