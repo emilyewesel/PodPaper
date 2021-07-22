@@ -177,27 +177,37 @@ public class MainActivity extends AppCompatActivity {
                                 //convert bitmap to File
 
                                 pod.setTitle(track.name);
-                                pod.setAuthor(track.artist.name);
+                                pod.setAuthor(track.album.name);
                                 pod.setAlbumCover(conversionBitmapParseFile(bitmap));
 
                                 pod.setUri(track.uri);
                                 //pod.setBitmap(bitmap);
                                 //pod.setUser(currentUser);
 
-                                Log.e("TAG", "setting up the podcast for real 2");
-                                pod.saveInBackground(new SaveCallback() {
-                                    @Override
-                                    public void done(ParseException e) {
-                                        if (e != null){
-                                            Log.e("ERORR!!! " + e," Toast.LENGTH_SHORT");
-                                        }
-
-                                        Log.i("TAG", "save was successful");
-                                        podcasts.add(pod);
-                                        mAdapter.notifyDataSetChanged();
-                                        Log.e("MainActivity!", "done setting up the podcast");
+                                boolean contains = false;
+                                for (Podcast podd: podcasts){
+                                    if(podd.getTitle().equals(pod.getTitle())){
+                                        contains = true;
                                     }
-                                });
+                                }
+                                Log.e("TAG", "setting up the podcast for real 2");
+                                if (!contains) {
+                                    pod.saveInBackground(new SaveCallback() {
+                                        @Override
+                                        public void done(ParseException e) {
+                                            if (e != null) {
+                                                Log.e("ERORR!!! " + e, " Toast.LENGTH_SHORT");
+                                            }
+
+                                            Log.i("TAG", "save was successful");
+
+                                            podcasts.add(pod);
+                                            mAdapter.notifyDataSetChanged();
+                                            Log.e("MainActivity!", "done setting up the podcast and it was unique so I added it!!");
+
+                                        }
+                                    });
+                                }
                                 //Podcast pod = new Podcast(track.name, bitmap, track.album.toString(), track.artist.name, track.uri);
 
 
@@ -205,7 +215,7 @@ public class MainActivity extends AppCompatActivity {
                             });
 
                     if (track != null) {
-                        Log.d("MainActivity", track.name + " by " + track.artist.name);
+                        Log.d("MainActivity", track.name + " by " + track.album.name);
                     }
                 });
 
