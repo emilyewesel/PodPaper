@@ -142,10 +142,12 @@ public class MainActivity extends AppCompatActivity {
         super.onStart();
         queryPods();
 
+
         // We will start writing our code here.
     }
 
     private void connected() {
+        queryPods();
         //this next line starts playing a certain playlist!!
         //https:
 //open.spotify.com/playlist/4ZgA4n77UZUqnzcly8siL4?uid=61c622228e63b298
@@ -157,57 +159,52 @@ public class MainActivity extends AppCompatActivity {
                 .subscribeToPlayerState()
                 .setEventCallback(playerState -> {
                     final Track track = playerState.track;
-                    Uri u = Uri.parse(track.imageUri.raw);
-                    u.getPath();
-                    Log.e("Hi this is emily!!", u.toString());
-                    ImageUri image = track.imageUri;
+                    Log.e("MainActivity", "we are dealing with the podcast " + track.name);
 
                     mSpotifyAppRemote
                             .getImagesApi()
                             .getImage(playerState.track.imageUri)
                             .setResultCallback(
                             bitmap -> {
-                                Log.e("TAG", "setting up the podcast");
                                 Podcast pod = new Podcast();
                                 ParseUser currentUser = ParseUser.getCurrentUser();
                                 pod.setUser(currentUser);
 
-                                Log.e("TAG", "setting up the podcast for real");
-                                //pod.setSelfie(null);
-                                //convert bitmap to File
 
                                 pod.setTitle(track.name);
                                 pod.setAuthor(track.album.name);
                                 pod.setAlbumCover(conversionBitmapParseFile(bitmap));
 
                                 pod.setUri(track.uri);
-                                //pod.setBitmap(bitmap);
-                                //pod.setUser(currentUser);
 
-                                boolean contains = false;
-                                for (Podcast podd: podcasts){
-                                    if(podd.getTitle().equals(pod.getTitle())){
-                                        contains = true;
-                                    }
-                                }
-                                Log.e("TAG", "setting up the podcast for real 2");
-                                if (!contains) {
-                                    pod.saveInBackground(new SaveCallback() {
-                                        @Override
-                                        public void done(ParseException e) {
-                                            if (e != null) {
-                                                Log.e("ERORR!!! " + e, " Toast.LENGTH_SHORT");
-                                            }
-
-                                            Log.i("TAG", "save was successful");
-
-                                            podcasts.add(pod);
-                                            mAdapter.notifyDataSetChanged();
-                                            Log.e("MainActivity!", "done setting up the podcast and it was unique so I added it!!");
-
-                                        }
-                                    });
-                                }
+//                                boolean contains = false;
+//                                for (Podcast podd: podcasts){
+//                                    if(podd.getTitle().equals(pod.getTitle())){
+//                                        contains = true;
+//                                    }
+//                                }
+//                                Log.e("TAG", "About to add the podcast ");
+//                                if (!contains) {
+//                                    pod.saveInBackground(new SaveCallback() {
+//                                        @Override
+//                                        public void done(ParseException e) {
+//                                            if (e != null) {
+//                                                Log.e("ERORR!!! " + e, " Toast.LENGTH_SHORT");
+//                                            }
+//
+//                                            Log.i("TAG", "save was successful");
+//
+//                                            podcasts.add(pod);
+//                                            mAdapter.notifyDataSetChanged();
+//                                            queryPods();
+//                                            Log.e("MainActivity!", "done setting up the podcast and it was unique so I added it!!" + " there were "+ podcasts.size() + " podcasts but none of then were " + pod.getTitle());
+//
+//                                        }
+//                                    });
+//                                }
+//                                else{
+//                                    Log.e("MainActivity", "the podcast was already there so I didn't add it :(");
+//                                }
                                 //Podcast pod = new Podcast(track.name, bitmap, track.album.toString(), track.artist.name, track.uri);
 
 
