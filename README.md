@@ -75,8 +75,7 @@ Week 1: The most important goal of this week is to get the spotify API up and ru
 Week 2: Integrate use of the Camera and make the UI look like a newspaper
 - [x] User can click on a podcast for a more detailed view of information about the podcast
 - [x] User can take pictures using the camera
-- [ ] These pictures can be saved with a podcast
-- [ ] Some podcasts have just a headline, while others have a headline AND a description
+- [x] These pictures can be saved with a podcast
 
 Week 3: The experience of using the app is more personalized
 - [ ] Users can save a podcast and view saved podcasts in a separate screen
@@ -84,7 +83,7 @@ Week 3: The experience of using the app is more personalized
 - [ ] In general, make the UI look more like a newspaper
 
 Week 4: Additional Features
-- [ ] User can like and comment on podcasts
+- [x] User can like on podcasts
 - [ ] User can search podcasts and find one that relates to their interests
 - [ ] User can click on an author and see more of the podcasts that the author has created
 
