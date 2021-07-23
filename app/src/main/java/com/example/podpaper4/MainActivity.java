@@ -72,7 +72,6 @@ public class MainActivity extends AppCompatActivity {
     private PodcastsAdapter mAdapter;
     private SharedPreferences sharedPreferences;
     //private RequestQueue queue;
-    // testing github commits
 
 
     @Override
@@ -148,13 +147,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void connected() {
         queryPods();
-        //this next line starts playing a certain playlist!!
-        //https:
-//open.spotify.com/playlist/4ZgA4n77UZUqnzcly8siL4?uid=61c622228e63b298
-      //  mSpotifyAppRemote.getPlayerApi().play("spotify:playlist:4ZgA4n77UZUqnzcly8siL4");
-
-        //URI temp = URI.create("spotify:playlist:4ZgA4n77UZUqnzcly8siL4");
-        //CallResult<ListItems> tempy = mSpotifyAppRemote.getContentApi().getRecommendedContentItems("playlist");
     mSpotifyAppRemote.getPlayerApi()
                 .subscribeToPlayerState()
                 .setEventCallback(playerState -> {
@@ -176,6 +168,7 @@ public class MainActivity extends AppCompatActivity {
                                 pod.setAlbumCover(conversionBitmapParseFile(bitmap));
 
                                 pod.setUri(track.uri);
+                                //Here we can save the podcast into the database if we choose to do so.
 
 //                                boolean contains = false;
 //                                for (Podcast podd: podcasts){
@@ -205,7 +198,6 @@ public class MainActivity extends AppCompatActivity {
 //                                else{
 //                                    Log.e("MainActivity", "the podcast was already there so I didn't add it :(");
 //                                }
-                                //Podcast pod = new Podcast(track.name, bitmap, track.album.toString(), track.artist.name, track.uri);
 
 
 
@@ -224,60 +216,17 @@ public class MainActivity extends AppCompatActivity {
             mSpotifyAppRemote
                     .getImagesApi()
                     .getImage(playerState.track.imageUri, Image.Dimension.LARGE);
-            // have some fun with playerState
         } else {
             Throwable error = playerStateResult.getError();
-            // try to have some fun with the error
         }
-        // Then we will write some more code here.
 
 
     }
 
-    /*public interface VolleyCallBack {
 
-        void onSuccess();
-    }
-
-     */
-    /*public List<Podcast> getRecentlyPlayedTracks(final VolleyCallBack callBack) {
-        String endpoint = "https://api.spotify.com/v1/me/player/recently-played";
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
-                (Request.Method.GET, endpoint, null, response -> {
-                    Gson gson = new Gson();
-                    JSONArray jsonArray = response.optJSONArray("items");
-                    for (int n = 0; n < jsonArray.length(); n++) {
-                        try {
-                            JSONObject object = jsonArray.getJSONObject(n);
-                            object = object.optJSONObject("track");
-                            Podcast podcast = gson.fromJson(object.toString(), Podcast.class);
-                            podcasts.add(podcast);
-                            Log.e("HI EVERYONE!!!", "THINGS R WORKING");
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    callBack.onSuccess();
-                }, error -> {
-                    // TODO: Handle error
-
-                }) {
-            @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
-                Map<String, String> headers = new HashMap<>();
-                String token = sharedPreferences.getString("token", "");
-                String auth = "Bearer " + token;
-                headers.put("Authorization", auth);
-                return headers;
-            }
-        };
-        queue.add(jsonObjectRequest);
-        return podcasts;
-        }
-     */
 
     private void queryPods() {
-        // specify what type of data we want to query - Post.class
+        // specify what type of data we want to query - Podcast.class
         ParseQuery<Podcast> query = ParseQuery.getQuery(Podcast.class);
         // include data referred by user key
         query.include(Podcast.KEY_TITLE);
@@ -295,26 +244,10 @@ public class MainActivity extends AppCompatActivity {
                     Log.e("TAG", "Issue with getting posts", e);
                     return;
                 }
-
-                // for debugging purposes let's print every post description to logcat
-//                for (Podcast podd : pods) {
-//                    if (podd.getObjectId().equals(pod.getObjectId())){
-//                        //selfiePic = podd.getSelfie();
-//                        Log.e("selfie pic isss ", "" +pod.getSelfie() + pod.getAuthor());
-//                        //Glide.with(PodcastDetailsActivity.this).load(pod.getSelfie()).into(selfie);
-//                    }
-//                    else{
-//                        Log.e("selfie pic is not ", "" +pod.getSelfie() + pod.getAuthor());
-//                    }
-//                    Log.i("TAG", "Post: " + pod.getTitle() + " " + pod.getSelfie());
-//                }
-
-//                allPosts.clear();
 //                // save received posts to list and notify adapter of new data
                 podcasts.clear();
                 podcasts.addAll(pods);
                 mAdapter.notifyDataSetChanged();
-//                swipeContainer.setRefreshing(false);
             }
         });
     }
@@ -336,6 +269,5 @@ public class MainActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         SpotifyAppRemote.disconnect(mSpotifyAppRemote);
-        // Aaand we will finish off here.
     }
 }

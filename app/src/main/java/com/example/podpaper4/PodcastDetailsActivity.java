@@ -92,20 +92,10 @@ public class PodcastDetailsActivity extends AppCompatActivity {
         titleDetails.setText(pod.getTitle());
         captionDetails.setText(pod.getAuthor());
         uri = pod.getUri();
-//        ParseQuery<Podcast> query = ParseQuery.getQuery(Podcast.class);
-//
-//        query.findInBackground();
 
 
         String imageUrl = pod.getAlbumCover().getUrl();
         Picasso.get().load(imageUrl).into(imageDetails);
-        //Glide.with(PodcastDetailsActivity.this).load(uri).into(imageDetails);
-        //imageDetails.setImageBitmap(pod.getUri());
-//        try {
-//            imageDetails.setImageBitmap(BitmapFactory.decodeFile(pod.getAlbumCover().getFile().getAbsolutePath()));
-//        } catch (ParseException e) {
-//            e.printStackTrace();
-//        }
 
 
 
@@ -170,59 +160,7 @@ public class PodcastDetailsActivity extends AppCompatActivity {
 
 
 
-//        ParseFile image = post.getImage();
-//        if (image != null) {
-//            Glide.with(PostDetailsActivity.this).load(image.getUrl()).into(imageDetails);
-//        }
-//        String timeSince = calculateTimeAgo(post.getCreatedAt());
-//        usernameDetails.setText(post.getUser().getUsername() + " " + timeSince);
-//        captionDetails.setText(post.getDescription());
-
     }
-
-    private void queryPods() {
-//        // specify what type of data we want to query - Post.class
-//        ParseQuery<Podcast> query = ParseQuery.getQuery(Podcast.class);
-//        // include data referred by user key
-//        query.include(Podcast.KEY_TITLE);
-//        query.include(Podcast.KEY_USER);
-//        // limit query to latest 20 items
-//        query.setLimit(20);
-//        // order posts by creation date (newest first)
-//        query.addDescendingOrder("createdAt");
-//        // start an asynchronous call for posts
-//        query.findInBackground(new FindCallback<Podcast>() {
-//            @Override
-//            public void done(List<Podcast> pods, ParseException e) {
-//                // check for errors
-//                if (e != null) {
-//                    Log.e("TAG", "Issue with getting posts", e);
-//                    return;
-//                }
-//
-//                // for debugging purposes let's print every post description to logcat
-////                for (Podcast podd : pods) {
-////                    if (podd.getObjectId().equals(pod.getObjectId())){
-////                        //selfiePic = podd.getSelfie();
-////                        Log.e("selfie pic isss ", "" +pod.getSelfie() + pod.getAuthor());
-////                        //Glide.with(PodcastDetailsActivity.this).load(pod.getSelfie()).into(selfie);
-////                    }
-////                    else{
-////                        Log.e("selfie pic is not ", "" +pod.getSelfie() + pod.getAuthor());
-////                    }
-////                    Log.i("TAG", "Post: " + pod.getTitle() + " " + pod.getSelfie());
-////                }
-//
-////                adapter.clear();
-////                allPosts.clear();
-////                // save received posts to list and notify adapter of new data
-////                allPosts.addAll(posts);
-////                adapter.notifyDataSetChanged();
-////                swipeContainer.setRefreshing(false);
-//            }
-//        });
-    }
-
 
     @Override
     protected void onStart() {
@@ -240,8 +178,6 @@ public class PodcastDetailsActivity extends AppCompatActivity {
                     public void onConnected(SpotifyAppRemote spotifyAppRemote) {
                         mSpotifyAppRemote = spotifyAppRemote;
                         Log.d("MainActivity", "Connected! Yay!");
-
-                        // Now you can start interacting with App Remote
                         connected = true;
                     }
 
@@ -249,11 +185,9 @@ public class PodcastDetailsActivity extends AppCompatActivity {
                     public void onFailure(Throwable throwable) {
                         Log.e("MainActivity failing to connect", throwable.getMessage(), throwable);
 
-                        // Something went wrong when attempting to connect! Handle errors here
                     }
                 });
 
-        queryPods();
         // We will start writing our code here.
     }
 
@@ -277,19 +211,14 @@ public class PodcastDetailsActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 // by this point we have the camera photo on disk
                 Bitmap takenImage = BitmapFactory.decodeFile(photoFile.getAbsolutePath());
-                // RESIZE BITMAP, see section below
-                // Load the taken image into a preview
-                //Bitmap resizedBitmap = BitmapScaler.scaleToFitWidth(takenImage, SOME_WIDTH);
                 selfie.setImageBitmap(takenImage);
                 savePod(photoFile);
-                pod.setAuthor("EMILYYY");
             } else { // Result was a failure
                 Toast.makeText(this, "Picture wasn't taken!", Toast.LENGTH_SHORT).show();
             }
         }
     }
     private File getPhotoFileUri(String photoFileName) {
-        pod.setAuthor("EMILYYY");
         // Get safe storage directory for photos
         // Use `getExternalFilesDir` on Context to access package-specific directories.
         // This way, we don't need to request external read/write runtime permissions.
@@ -311,7 +240,6 @@ public class PodcastDetailsActivity extends AppCompatActivity {
         // Create a File reference for future access
         photoFile = getPhotoFileUri(photoFileName);
         //savePod(photoFile);
-        pod.setAuthor("EMILYYY");
 
         // wrap File object into a content provider
         // required for API >= 24
@@ -325,24 +253,12 @@ public class PodcastDetailsActivity extends AppCompatActivity {
             // Start the image capture intent to take photo
             Log.e("about to start image for result", "yep");
             startActivityForResult(intent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
-            pod.setAuthor("EMILYYY");
 
         }
     }
 
-    private void savePod(/*String description, ParseUser currentUser*/File photoFile) {
-//        Post post = new Post();
-//        post.setDescription(description);
-//        post.setImage(new ParseFile(photoFile));
-//        post.setUser(currentUser);
-
-
-
-        //String filePath = photoFile.getPath();
-        //Bitmap bitmap = BitmapFactory.decodeFile(filePath);
+    private void savePod(File photoFile) {
         pod.setSelfie(new ParseFile(photoFile));
-        //Log.e("emily!!", pod.getmSelfie().toString());
-//        //Toast.makeText(MainActivity.this, "Trying to save post!!!", Toast.LENGTH_SHORT).show();
         pod.saveInBackground(new SaveCallback() {
             @Override
             public void done(ParseException e) {
