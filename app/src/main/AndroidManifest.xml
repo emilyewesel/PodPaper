@@ -17,14 +17,15 @@
         android:required="false" />
 
     <application
+        android:name=".ParseApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:name=".ParseApplication"
-        android:theme="@style/Theme.PodPaper4"
-        >
+        android:theme="@style/Theme.PodPaper4">
+        <activity android:name=".SearchActivity"></activity>
+
         <meta-data
             android:name="com.parse.SERVER_URL"
             android:value="https://parseapi.back4app.com" />
@@ -34,7 +35,8 @@
         <meta-data
             android:name="com.parse.CLIENT_KEY"
             android:value="4V0CoiSO45wDWjAoetdE80q5DJPW4pyF2xSxqjmN" />
-        <activity android:name=".PodcastDetailsActivity"></activity>
+
+        <activity android:name=".PodcastDetailsActivity" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -53,8 +55,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".MainActivity">
-        </activity>
+        <activity android:name=".MainActivity"></activity>
     </application>
 
 </manifest>

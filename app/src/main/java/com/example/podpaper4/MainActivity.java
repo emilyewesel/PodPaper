@@ -10,9 +10,11 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import java.util.*;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
+
 
 //import com.android.volley.AuthFailureError;
 //import com.android.volley.Request;
@@ -40,6 +42,7 @@ import com.spotify.protocol.types.ImageUri;
 import com.spotify.protocol.types.ListItems;
 import com.spotify.protocol.types.PlayerState;
 import com.spotify.protocol.types.Track;
+import java.util.ArrayList;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -54,7 +57,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+
 import java.util.concurrent.TimeUnit;
+
+import static java.lang.Integer.valueOf;
 
 public class MainActivity extends AppCompatActivity {
     private static final String CLIENT_ID = "496eef6c993a4b4a98c9402893592d15";
@@ -72,6 +78,9 @@ public class MainActivity extends AppCompatActivity {
     private PodcastsAdapter mAdapter;
     private SharedPreferences sharedPreferences;
     //private RequestQueue queue;
+
+    private String delimiters = " .',?;:";
+    private Map<String, Map<String, ArrayList<Integer>>> inverted_index = new HashMap<String, Map<String, ArrayList<Integer>>>();
 
 
     @Override
@@ -250,6 +259,51 @@ public class MainActivity extends AppCompatActivity {
                 mAdapter.notifyDataSetChanged();
             }
         });
+        populate_vectors();
+    }
+
+    private void populate_vectors(){
+        //pasta: {doc 1:{1, 2, 3}, doc 2: {2, 3,5}}
+        //Putting the title of a podcast into a vector of words
+        for (Podcast poddd: podcasts) {
+            String title = poddd.getTitle();
+            String idNum = poddd.getObjectId();
+            String realTitle = "";
+            for (int i = 0; i < title.length(); i++) {
+                if (delimiters.indexOf(title.charAt(i)) != -1) {
+                    realTitle += " ";
+                } else {
+                    realTitle += title.charAt(i);
+                }
+
+            }
+            String[] keywords = realTitle.split(" ");
+
+            //Now that we have the vectors, we will build the inverted index
+            for (int i = 0; i < keywords.length; i++) {
+                String word = keywords[i];
+                if (inverted_index.containsKey(word)) {
+
+                    if (inverted_index.containsKey(idNum)) {
+                        inverted_index.get(word).get(idNum).add(valueOf(i));
+                    } else {
+                        ArrayList<Integer> temp = new ArrayList<>();
+                        temp.add(valueOf(i));
+                        inverted_index.get(word).put(idNum, temp);
+                    }
+
+                } else {
+                    ArrayList<Integer> temp = new ArrayList<>();
+                    temp.add(valueOf(i));
+                    Map<String, ArrayList<Integer>> tempy = new HashMap<String, ArrayList<Integer>>();
+                    tempy.put(idNum, temp);
+                    inverted_index.put(word, tempy);
+
+                }
+
+            }
+        }
+        Log.e("MainActivity", inverted_index.toString());
     }
     public ParseFile conversionBitmapParseFile(Bitmap imageBitmap){
         ByteArrayOutputStream byteArrayOutputStream=new ByteArrayOutputStream();

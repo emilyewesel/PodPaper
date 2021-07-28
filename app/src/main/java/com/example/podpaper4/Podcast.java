@@ -40,6 +40,9 @@ public class Podcast extends ParseObject implements Parcelable {
         put(KEY_USER, key);
 
     }
+    public String getIdNumber(){
+        return getString("objectId");
+    }
     public ParseFile getSelfie() {
         return getParseFile(KEY_SELFIE);
     }
