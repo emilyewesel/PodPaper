@@ -10,9 +10,18 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/doSearch"
+        android:id="@+id/FYP"
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
+        android:onClick="handleFYP"
+        android:text="FYP"
+        />
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/doSearch"
+        android:layout_alignParentTop="true"
+        android:layout_toLeftOf="@+id/FYP"
         android:onClick="handleSearch"
         android:text="Search"
         />

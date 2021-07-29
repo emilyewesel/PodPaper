@@ -78,14 +78,17 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView rvPodcasts;
     private List<Podcast> podcasts;
     private List<Podcast> masterPodcasts;
+    private List<Podcast> likedPodcasts;
 
     private PodcastsAdapter mAdapter;
     private SharedPreferences sharedPreferences;
     //private RequestQueue queue;
 
-    public String [] foreignWords = {"Turkey", "Turkish", "Prime", "Minister", "Latin", "Iran", "Germany", "Syria",
-            "Foreign", "Ethiopia", "Korea", "Myanmar", "Italy", "Peru", "Haiti", "International"};
-    private String [] scienceWords = {"Osmosis", "covid", "corona", "virus", "pandemic", "shot"};
+    String [] temp = {"turkey", "turkish", "prime", "minister", "latin", "iran", "germany", "syria",
+            "foreign", "ethiopia", "korea", "myanmar", "italy", "peru", "haiti", "international"};
+    public ArrayList<String> foreignWords = new ArrayList<String>(Arrays.asList(temp));
+    private String [] scienceWordsyy = {"osmosis", "covid", "corona", "virus", "pandemic", "shot"};
+    public ArrayList<String> scienceWords = new ArrayList<String>(Arrays.asList(scienceWordsyy));
     private String delimiters = " .',?;:";
     private Map<String, Map<String, ArrayList<Integer>>> inverted_index = new HashMap<String, Map<String, ArrayList<Integer>>>();
 
@@ -236,10 +239,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             Throwable error = playerStateResult.getError();
         }
-
-
     }
-
 
 
     public void handleSearch(View view){
@@ -277,17 +277,57 @@ public class MainActivity extends AppCompatActivity {
                     Log.e("TAG", "Issue with getting posts", e);
                     return;
                 }
-//                // save received posts to list and notify adapter of new data
+                // save received posts to list and notify adapter of new data
                 masterPodcasts = pods;
+
                 podcasts.clear();
                 podcasts.addAll(pods);
                 mAdapter.notifyDataSetChanged();
                 populate_vectors();
+                populate_feature_scores();
 
             }
         });
 
     }
+
+    private void populate_feature_scores() {
+        for (int i =0; i < masterPodcasts.size(); i ++){
+            String [] words = processText(masterPodcasts.get(i).getTitle());
+            int foreignScore = 0;
+            int scienceScore = 0;
+            for (int j = 0; j < words.length; j ++){
+                if(foreignWords.contains(words[j])){
+                    foreignScore ++;
+                }
+                if(scienceWords.contains(words[j])){
+                    scienceScore ++;
+                }
+            }
+            Map<String, Integer> scores = new HashMap<>();
+            scores.put("scienceScore", scienceScore);
+            scores.put("foreignScore", foreignScore);
+            featureScores.put(masterPodcasts.get(i).getObjectId(), scores);
+
+        }
+
+    }
+
+    public void handleFYP(View view){
+        ArrayList<Integer> foreignScores = new ArrayList<Integer>();
+        for (int i = 0; i < masterPodcasts.size(); i ++){
+            Integer score = featureScores.get(masterPodcasts.get(i).getObjectId()).get("foreignScore");
+            foreignScores.add(score);
+        }
+        ArrayList<Podcast> podss =  getFYP(foreignScores, 5);
+
+        podcasts.clear();
+        podcasts.addAll(podss);
+        mAdapter.notifyDataSetChanged();
+
+
+    }
+
     private ArrayList<Podcast> rank_documents(String query){
         String [] wordsInQuery = processText(query);
 
@@ -345,9 +385,6 @@ public class MainActivity extends AppCompatActivity {
         ArrayList<Double> list = new ArrayList<>(Arrays.asList(documentScoresDoubles));
         return getKMostRelevant(list, 3);
 
-
-
-
     }
     private ArrayList<Podcast> getKMostRelevant(ArrayList<Double> listy, int numDesired){
         ArrayList<Podcast> returnThis = new ArrayList<Podcast>();
@@ -362,6 +399,27 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
             returnThis.add(podcasts.get(highestIndex));
+            listyy.remove(highestIndex);
+        }
+        for (int e = 0; e < numDesired; e++ ) {
+            Log.e("here are the most relevant documents!!!", returnThis.get(e).getTitle());
+        }
+        return returnThis;
+    }
+
+    private ArrayList<Podcast> getFYP(ArrayList<Integer> listy, int numDesired){
+        ArrayList<Podcast> returnThis = new ArrayList<Podcast>();
+        ArrayList<Integer> listyy = (ArrayList<Integer>) listy.clone();
+        for (int i =0; i < numDesired; i++){
+            double highestScore = 0;
+            int highestIndex = 0;
+            for (int j = 0; j <listyy.size(); j ++){
+                if (listyy.get(j) >= highestScore){
+                    highestIndex = j;
+                    highestScore = listyy.get(j);
+                }
+            }
+            returnThis.add(masterPodcasts.get(highestIndex));
             listyy.remove(highestIndex);
         }
         for (int e = 0; e < numDesired; e++ ) {
