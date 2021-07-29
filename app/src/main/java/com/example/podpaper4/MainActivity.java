@@ -13,6 +13,7 @@ import android.os.Bundle;
 import java.util.*;
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.Toast;
 
 
@@ -72,16 +73,23 @@ public class MainActivity extends AppCompatActivity {
     public static final String FALLBACK_URL = "https://codepath.github.io/android-rest-client-template/success.html";
 
     private SpotifyAppRemote mSpotifyAppRemote;
+    private EditText searchTerm;
 
     private RecyclerView rvPodcasts;
     private List<Podcast> podcasts;
+    private List<Podcast> masterPodcasts;
+
     private PodcastsAdapter mAdapter;
     private SharedPreferences sharedPreferences;
     //private RequestQueue queue;
 
+    public String [] foreignWords = {"Turkey", "Turkish", "Prime", "Minister", "Latin", "Iran", "Germany", "Syria",
+            "Foreign", "Ethiopia", "Korea", "Myanmar", "Italy", "Peru", "Haiti", "International"};
+    private String [] scienceWords = {"Osmosis", "covid", "corona", "virus", "pandemic", "shot"};
     private String delimiters = " .',?;:";
     private Map<String, Map<String, ArrayList<Integer>>> inverted_index = new HashMap<String, Map<String, ArrayList<Integer>>>();
 
+    private Map<String, Map<String, Integer>> featureScores = new HashMap<String, Map<String, Integer>>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -234,6 +242,22 @@ public class MainActivity extends AppCompatActivity {
 
 
 
+    public void handleSearch(View view){
+        //queryPods();
+        podcasts.clear();
+        podcasts.addAll(masterPodcasts);
+        searchTerm = findViewById(R.id.searchTerm);
+        String term = searchTerm.getText().toString();
+        searchTerm.setText("");
+        int numPods = 3;
+        ArrayList<Podcast> podcasts11 = rank_documents(term);
+        podcasts.clear();
+        podcasts.addAll(podcasts11);
+        Log.e("changing the podcasts to beee", podcasts.toString());
+        mAdapter.notifyDataSetChanged();
+
+
+    }
     private void queryPods() {
         // specify what type of data we want to query - Podcast.class
         ParseQuery<Podcast> query = ParseQuery.getQuery(Podcast.class);
@@ -254,19 +278,118 @@ public class MainActivity extends AppCompatActivity {
                     return;
                 }
 //                // save received posts to list and notify adapter of new data
+                masterPodcasts = pods;
                 podcasts.clear();
                 podcasts.addAll(pods);
                 mAdapter.notifyDataSetChanged();
+                populate_vectors();
+
             }
         });
-        populate_vectors();
+
+    }
+    private ArrayList<Podcast> rank_documents(String query){
+        String [] wordsInQuery = processText(query);
+
+        Map<String, Integer> wordCount = new HashMap<String, Integer>();
+
+        for (int i = 0; i < wordsInQuery.length; i++) {
+            String word = wordsInQuery[i];
+            if (wordCount.containsKey(word)){
+                wordCount.put(word, valueOf(wordCount.get(word).intValue() +1));
+            }
+            else{
+                wordCount.put(word, 1);
+            }
+        }
+
+        double [] documentScores = new double [podcasts.size()];
+        for (int i =0; i < documentScores.length; i ++){
+            documentScores[i] = 0;
+        }
+
+        Set<String> keys = wordCount.keySet();
+        String [] keyArray = new String[keys.size()];
+        int k =0;
+        for (String key: keys){
+            keyArray[k++] = key;
+        }
+        for (int i = 0; i < keyArray.length; i++){
+            String word = keyArray[i];
+            for (int j = 0; j < podcasts.size(); j ++){
+                //Log.e("inverted index at word is ", "" + inverted_index.get(word).toString());
+                //Log.e("and the id number is ", "" +podcasts.get(j).getObjectId() + "the podcasts array is " + podcasts.toString());
+                if(inverted_index.containsKey(word) && inverted_index.get(word).containsKey(podcasts.get(j).getObjectId())) {
+                    Log.e("now we are ", "adding to the tf idf");
+                    double tf_idf = getTFIDFValue(word, podcasts.get(j).getObjectId());
+                    double tfQ = 1 + Math.log10(wordCount.get(word));
+                    if(tf_idf * tfQ > 0) {
+                        Log.e("TAG", "the word " + word + " is in the podcast " + podcasts.get(j).getTitle());
+                        documentScores[j] += tf_idf * tfQ;
+                    }
+                }
+            else{
+                Log.e("no",  "longer adding to the inverted index :(");
+                }
+            }
+        }
+
+        Double [] documentScoresDoubles = new Double [podcasts.size()];
+        for (int i =0; i < documentScoresDoubles.length; i ++){
+            documentScoresDoubles[i] = new Double(documentScores[i]);
+        }
+
+        for (int e = 0; e < podcasts.size(); e++ ) {
+            Log.e("the document ", podcasts.get(e).getTitle() +  " has a score of " + documentScores[e]);
+        }
+        ArrayList<Double> list = new ArrayList<>(Arrays.asList(documentScoresDoubles));
+        return getKMostRelevant(list, 3);
+
+
+
+
+    }
+    private ArrayList<Podcast> getKMostRelevant(ArrayList<Double> listy, int numDesired){
+        ArrayList<Podcast> returnThis = new ArrayList<Podcast>();
+        ArrayList<Double> listyy = (ArrayList<Double>) listy.clone();
+        for (int i =0; i < numDesired; i++){
+            double highestScore = 0;
+            int highestIndex = 0;
+            for (int j = 0; j <listyy.size(); j ++){
+                if (listyy.get(j) >= highestScore){
+                    highestIndex = j;
+                    highestScore = listyy.get(j);
+                }
+            }
+            returnThis.add(podcasts.get(highestIndex));
+            listyy.remove(highestIndex);
+        }
+        for (int e = 0; e < numDesired; e++ ) {
+            Log.e("here are the most relevant documents!!!", returnThis.get(e).getTitle());
+        }
+        return returnThis;
+    }
+    private String [] processText(String text){
+        text = text.toLowerCase();
+        String realTitle = "";
+        for (int i = 0; i < text.length(); i++) {
+            if (delimiters.indexOf(text.charAt(i)) != -1) {
+                realTitle += " ";
+            } else {
+                realTitle += text.charAt(i);
+            }
+
+        }
+        String[] keywords = realTitle.split(" ");
+        return keywords;
+
     }
 
     private void populate_vectors(){
         //pasta: {doc 1:{1, 2, 3}, doc 2: {2, 3,5}}
         //Putting the title of a podcast into a vector of words
         for (Podcast poddd: podcasts) {
-            String title = poddd.getTitle();
+            String title = poddd.getTitle().toLowerCase();
             String idNum = poddd.getObjectId();
             String realTitle = "";
             for (int i = 0; i < title.length(); i++) {
@@ -304,6 +427,17 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         Log.e("MainActivity", inverted_index.toString());
+    }
+    public int getTFValue(String word, String doc){
+        return inverted_index.get(word).get(doc).size();
+
+    }
+    public int getIDFValue(String word){
+        return inverted_index.get(word).size();
+    }
+
+    public double getTFIDFValue(String word, String doc){
+        return (1 + Math.log10(getTFValue(word, doc)))*(Math.log10(podcasts.size()/getIDFValue(word)));
     }
     public ParseFile conversionBitmapParseFile(Bitmap imageBitmap){
         ByteArrayOutputStream byteArrayOutputStream=new ByteArrayOutputStream();

@@ -6,8 +6,27 @@
     android:layout_height="wrap_content"
     >
 
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/doSearch"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:onClick="handleSearch"
+        android:text="Search"
+        />
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter search term"
+        android:id="@+id/searchTerm"
+        android:layout_toLeftOf="@+id/doSearch"
+        android:layout_alignParentTop="true"
+        />
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvPodcasts"
+        android:layout_below="@id/searchTerm"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
     <Button
