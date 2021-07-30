@@ -89,10 +89,13 @@ public class MainActivity extends AppCompatActivity {
     public ArrayList<String> foreignWords = new ArrayList<String>(Arrays.asList(temp));
     private String [] scienceWordsyy = {"osmosis", "covid", "corona", "virus", "pandemic", "shot"};
     public ArrayList<String> scienceWords = new ArrayList<String>(Arrays.asList(scienceWordsyy));
-    private String delimiters = " .',?;:";
+    private String delimiters = " .',?;:-’";
     private Map<String, Map<String, ArrayList<Integer>>> inverted_index = new HashMap<String, Map<String, ArrayList<Integer>>>();
 
     private Map<String, Map<String, Integer>> featureScores = new HashMap<String, Map<String, Integer>>();
+
+    private Map<String, Integer> userPreferences = new HashMap<>();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -152,6 +155,9 @@ public class MainActivity extends AppCompatActivity {
                 });
 
         queryPods();
+        userPreferences.put("scienceScore", 0);
+        userPreferences.put("foreignScore", 0);
+        userPreferences.put("newsScore", 0);
 
 
     }
@@ -285,6 +291,7 @@ public class MainActivity extends AppCompatActivity {
                 mAdapter.notifyDataSetChanged();
                 populate_vectors();
                 populate_feature_scores();
+                populate_user_preferences();
 
             }
         });
@@ -296,6 +303,7 @@ public class MainActivity extends AppCompatActivity {
             String [] words = processText(masterPodcasts.get(i).getTitle());
             int foreignScore = 0;
             int scienceScore = 0;
+            int newsScore = 0;
             for (int j = 0; j < words.length; j ++){
                 if(foreignWords.contains(words[j])){
                     foreignScore ++;
@@ -304,28 +312,62 @@ public class MainActivity extends AppCompatActivity {
                     scienceScore ++;
                 }
             }
+            String author = masterPodcasts.get(i).getAuthor();
+            if (author.equals("The Times: Daily news from the L.A. Times") || author.equals("The Daily")){
+                newsScore += 3;
+            }
+            else if (author.equals("EMILYYY") || author.equals("Hopkins Podcast on Foreign Affairs")){
+                foreignScore += 4;
+            }
+            else if (author.equals("Stuff You Should Know")){
+                scienceScore += 1;
+                newsScore -= 1;
+            }
+
             Map<String, Integer> scores = new HashMap<>();
             scores.put("scienceScore", scienceScore);
             scores.put("foreignScore", foreignScore);
+            scores.put("newsScore", newsScore);
             featureScores.put(masterPodcasts.get(i).getObjectId(), scores);
 
         }
+    }
 
+    private void populate_user_preferences(){
+        Set<String> keys = userPreferences.keySet();
+        for (int i =0; i < masterPodcasts.size(); i ++) {
+            if (masterPodcasts.get(i).getSelfie() != null) {
+                for (String key : keys) {
+                    userPreferences.put(key, valueOf(userPreferences.get(key) + featureScores.get(masterPodcasts.get(i).getObjectId()).get(key)));
+                }
+            }
+        }
+        Log.e("I think that the user likes!! ", userPreferences.keySet().toString() + userPreferences.values().toString());
     }
 
     public void handleFYP(View view){
-        ArrayList<Integer> foreignScores = new ArrayList<Integer>();
-        for (int i = 0; i < masterPodcasts.size(); i ++){
-            Integer score = featureScores.get(masterPodcasts.get(i).getObjectId()).get("foreignScore");
-            foreignScores.add(score);
-        }
-        ArrayList<Podcast> podss =  getFYP(foreignScores, 5);
+        ArrayList<Double> finalScores = getDotProducts();
+
+        ArrayList<Podcast> podss =  getFYP(finalScores, 5);
 
         podcasts.clear();
         podcasts.addAll(podss);
         mAdapter.notifyDataSetChanged();
 
+    }
 
+    public ArrayList<Double> getDotProducts(){
+        Set<String> keys = userPreferences.keySet();
+        ArrayList<Double> dotProducts = new ArrayList<>();
+
+        for (int i = 0; i < masterPodcasts.size(); i ++){
+            double fullScore  = 0;
+            for (String key : keys) {
+                fullScore += featureScores.get(masterPodcasts.get(i).getObjectId()).get(key) * userPreferences.get(key);
+            }
+            dotProducts.add(fullScore);
+        }
+        return dotProducts;
     }
 
     private ArrayList<Podcast> rank_documents(String query){
@@ -407,9 +449,9 @@ public class MainActivity extends AppCompatActivity {
         return returnThis;
     }
 
-    private ArrayList<Podcast> getFYP(ArrayList<Integer> listy, int numDesired){
+    private ArrayList<Podcast> getFYP(ArrayList<Double> listy, int numDesired){
         ArrayList<Podcast> returnThis = new ArrayList<Podcast>();
-        ArrayList<Integer> listyy = (ArrayList<Integer>) listy.clone();
+        ArrayList<Double> listyy = (ArrayList<Double>) listy.clone();
         for (int i =0; i < numDesired; i++){
             double highestScore = 0;
             int highestIndex = 0;
@@ -454,6 +496,7 @@ public class MainActivity extends AppCompatActivity {
                 if (delimiters.indexOf(title.charAt(i)) != -1) {
                     realTitle += " ";
                 } else {
+                    Log.e("TAG", title.charAt(i) +" is not in " + delimiters);
                     realTitle += title.charAt(i);
                 }
 
