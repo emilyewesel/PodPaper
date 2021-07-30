@@ -321,7 +321,6 @@ public class MainActivity extends AppCompatActivity {
             }
             else if (author.equals("Stuff You Should Know")){
                 scienceScore += 1;
-                newsScore -= 1;
             }
 
             Map<String, Integer> scores = new HashMap<>();
@@ -348,7 +347,7 @@ public class MainActivity extends AppCompatActivity {
     public void handleFYP(View view){
         ArrayList<Double> finalScores = getDotProducts();
 
-        ArrayList<Podcast> podss =  getFYP(finalScores, 5);
+        ArrayList<Podcast> podss =  getFYP(finalScores, 4);
 
         podcasts.clear();
         podcasts.addAll(podss);
