@@ -52,7 +52,6 @@ public class PodcastDetailsActivity extends AppCompatActivity {
     private ImageView imageDetails;
     private TextView titleDetails;
     private TextView captionDetails;
-    private TextView tapText;
     File photoFile;
     private SpotifyAppRemote mSpotifyAppRemote;
     private String uri;
@@ -64,14 +63,8 @@ public class PodcastDetailsActivity extends AppCompatActivity {
     private ImageView selfie;
     private LottieAnimationView heart;
     private Podcast pod;
-    ParseFile selfiePic;
-
-
 
     private static final String CLIENT_ID = "496eef6c993a4b4a98c9402893592d15";
-
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,46 +76,31 @@ public class PodcastDetailsActivity extends AppCompatActivity {
         captionDetails = findViewById(R.id.captionDetail);
         takePic = findViewById(R.id.takePicture);
         selfie = findViewById(R.id.selfie);
-        tapText = findViewById(R.id.tapText);
         heart = findViewById(R.id.heart);
+        TAG = "PodcastDetailsActivity";
 
         pod = (Podcast) Parcels.unwrap(getIntent().getParcelableExtra("pod"));
-
 
         titleDetails.setText(pod.getTitle());
         captionDetails.setText(pod.getAuthor());
         uri = pod.getUri();
 
-
         String imageUrl = pod.getAlbumCover().getUrl();
         Picasso.get().load(imageUrl).into(imageDetails);
 
-
-
-
-
         if (pod.getSelfie() != null){
-            Log.e("I HAVE A SELFIE I WANT TO SHARE", "by emily");
-            //BitmapFactory.decodeFile(photoFile.getAbsolutePath());
             Glide.with(PodcastDetailsActivity.this).load(pod.getSelfie().getUrl()).into(selfie);
             Animation fadeIn = new AlphaAnimation(0, 1);
             fadeIn.setInterpolator(new DecelerateInterpolator()); //add this
             fadeIn.setDuration(1000);
 
-            Animation fadeOut = new AlphaAnimation(1, 0);
-            fadeOut.setInterpolator(new AccelerateInterpolator()); //and this
-            fadeOut.setStartOffset(1000);
-            fadeOut.setDuration(1000);
-
             AnimationSet animation = new AnimationSet(false); //change to false
             animation.addAnimation(fadeIn);
-            animation.addAnimation(fadeOut);
             selfie.setAnimation(animation);
         }
         else{
-            Log.e("no selfie :/", "emily");
+            Log.e(TAG, "No selfie to display");
         }
-
 
         imageDetails.setOnTouchListener(new View.OnTouchListener() {
             private GestureDetector gestureDetector = new GestureDetector(PodcastDetailsActivity.this, new GestureDetector.SimpleOnGestureListener() {
@@ -152,21 +130,16 @@ public class PodcastDetailsActivity extends AppCompatActivity {
         firstObject.put("message","Hey ! First message from android. Parse is now connected");
         firstObject.saveInBackground(e -> {
             if (e != null){
-                Log.e("MainActivity", e.getLocalizedMessage());
+                Log.e(TAG, e.getLocalizedMessage());
             }else{
-                Log.d("MainActivity","Object saved.");
+                Log.d(TAG,"Object saved.");
             }
         });
-
-
-
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-
-
         ConnectionParams connectionParams =
                 new ConnectionParams.Builder(CLIENT_ID)
                         .setRedirectUri(FALLBACK_URL)
@@ -177,31 +150,27 @@ public class PodcastDetailsActivity extends AppCompatActivity {
                     @Override
                     public void onConnected(SpotifyAppRemote spotifyAppRemote) {
                         mSpotifyAppRemote = spotifyAppRemote;
-                        Log.d("MainActivity", "Connected! Yay!");
+                        Log.d(TAG, "Connected! Yay!");
                         connected = true;
                     }
-
                     @Override
                     public void onFailure(Throwable throwable) {
                         Log.e("MainActivity failing to connect", throwable.getMessage(), throwable);
 
                     }
                 });
-
-        // We will start writing our code here.
     }
-
-
+    /*
+    This function makes the podcast play in the spotify app and it gives the user visual feedback about the song
+     */
     public void handlePlayPodcast(View view){
         while (true) {
             if(connected) {
-                //Log.e("spotify:track:" +uri, "is somehow not the same thing as " + "spotify:track:5HCyWlXZPP0y6Gqq8TgA20" );
                 mSpotifyAppRemote.getPlayerApi().play(uri);
                 Toast.makeText(PodcastDetailsActivity.this, "Now playing " + titleDetails.getText(), Toast.LENGTH_SHORT).show();
                 break;
             }
         }
-
     }
 
     @Override
@@ -209,11 +178,10 @@ public class PodcastDetailsActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
-                // by this point we have the camera photo on disk
                 Bitmap takenImage = BitmapFactory.decodeFile(photoFile.getAbsolutePath());
                 selfie.setImageBitmap(takenImage);
                 savePod(photoFile);
-            } else { // Result was a failure
+            } else {
                 Toast.makeText(this, "Picture wasn't taken!", Toast.LENGTH_SHORT).show();
             }
         }
@@ -223,12 +191,10 @@ public class PodcastDetailsActivity extends AppCompatActivity {
         // Use `getExternalFilesDir` on Context to access package-specific directories.
         // This way, we don't need to request external read/write runtime permissions.
         File mediaStorageDir = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), TAG);
-
         // Create the storage directory if it does not exist
         if (!mediaStorageDir.exists() && !mediaStorageDir.mkdirs()){
             Log.d(TAG, "failed to create directory");
         }
-
         // Return the file target for the photo based on filename
         return new File(mediaStorageDir.getPath() + File.separator + photoFileName);
 
@@ -257,16 +223,18 @@ public class PodcastDetailsActivity extends AppCompatActivity {
         }
     }
 
+    /*
+    This function saves the podcast, including the selfie, in a background thread
+     */
     private void savePod(File photoFile) {
         pod.setSelfie(new ParseFile(photoFile));
         pod.saveInBackground(new SaveCallback() {
             @Override
             public void done(ParseException e) {
                 if (e != null){
-                    Log.e("ERORR!!! " + e," Toast.LENGTH_SHORT");
-                    Toast.makeText(PodcastDetailsActivity.this, "ERORR!!! " + e, Toast.LENGTH_SHORT).show();
+                    Log.e("ERROR! " + e," Toast.LENGTH_SHORT");
                 }
-                Log.i(TAG, "save was successful!!! YAY!!!!");
+                Log.i(TAG, "save was successful!");
             }
         });
     }

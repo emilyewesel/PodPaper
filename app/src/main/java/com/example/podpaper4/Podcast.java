@@ -33,16 +33,8 @@ public class Podcast extends ParseObject implements Parcelable {
     public static final String KEY_ALBUMCOVER = "albumCover";
     public static final String KEY_Uri = "Uri";
 
-    public ParseUser getUser() {
-        return getParseUser(KEY_USER);
-    }
-    public void setUser(ParseUser key){
-        put(KEY_USER, key);
+    public void setUser(ParseUser key){ put(KEY_USER, key); }
 
-    }
-    public String getIdNumber(){
-        return getString("objectId");
-    }
     public ParseFile getSelfie() {
         return getParseFile(KEY_SELFIE);
     }

@@ -40,12 +40,10 @@ public class LoginActivity extends AppCompatActivity {
             goMainActivity();
         }
 
-
         usernameEt = findViewById(R.id.username);
         passwordEt = findViewById(R.id.password);
         btnLogin = findViewById(R.id.loginButton);
         signButton = findViewById(R.id.signButton);
-
 
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -55,8 +53,6 @@ public class LoginActivity extends AppCompatActivity {
                 loginUser(username, password);
 
             }
-
-
         });
         signButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -64,12 +60,10 @@ public class LoginActivity extends AppCompatActivity {
                 String username = usernameEt.getText().toString();
                 String password = passwordEt.getText().toString();
                 signUp(username, password);
-
             }
-
-
         });
     }
+
     private void loginUser(String username, String password){
         Log.e("trying to log in with", username + " " + password);
         //Allows user to continue using the app since log in happens in the background
@@ -85,37 +79,28 @@ public class LoginActivity extends AppCompatActivity {
                 Log.e("this is ", "working!!");
             }
         });
-
     }
 
     private void signUp(String username, String password){
-
         ParseUser user = new ParseUser();
-        // Set core properties
         user.setUsername(username);
         user.setPassword(password);
-        // Invoke signUpInBackground
+        //Putting this on a background thread allows the user to continue using the app even as
+        // Parse saves the information
         user.signUpInBackground(new SignUpCallback() {
             public void done(ParseException e) {
                 if (e == null) {
                     Log.e("Sign up" , " was successful");
-                    // Hooray! Let them use the app now.
                 } else {
                     Log.e("Sign up" , " was not successful " + e );
-                    // Sign up didn't succeed. Look at the ParseException
-                    // to figure out what went wrong
                 }
             }
         });
-
-
     }
 
     private void goMainActivity() {
         Intent i = new Intent(this, MainActivity.class);
         startActivity(i);
         finish();
-
-
     }
 }

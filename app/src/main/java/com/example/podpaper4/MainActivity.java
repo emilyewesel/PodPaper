@@ -485,24 +485,28 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    /*
+    This function uses the edit distance function to determine what a mispelled word is likely to be
+     */
     private String findClosestWord(String fakeWord) {
         String bestWord = fakeWord;
         double bestDistance = 99999999;
         Set<String> realWords = inverted_index.keySet();
-        Log.e("the REAL keys are", inverted_index.keySet().toString());
         for (String word : realWords){
             double editDistance = findEditDistance(fakeWord, word);
-            Log.e("The word ", word + " has an edit disatnace of " + editDistance);
             if (editDistance < bestDistance){
                 bestDistance = editDistance;
                 bestWord = word;
             }
-
         }
         Log.e("The best word is ", bestWord);
         return bestWord;
     }
 
+    /*
+    Used for finding the podcasts best suited to a search term, this function takes the precomputed
+    scores and returns the best podcasts to display to the user searching.
+     */
     private ArrayList<Podcast> getKMostRelevant(ArrayList<Double> listy, int numDesired){
         ArrayList<Podcast> returnThis = new ArrayList<Podcast>();
         ArrayList<Double> listyy = (ArrayList<Double>) listy.clone();
@@ -524,6 +528,9 @@ public class MainActivity extends AppCompatActivity {
         return returnThis;
     }
 
+    /*
+    This function populates the for you page by finding the podcasts with the highest predicted rating
+     */
     private ArrayList<Podcast> getFYP(ArrayList<Double> listy, int numDesired){
         ArrayList<Podcast> returnThis = new ArrayList<Podcast>();
         ArrayList<Double> listyy = (ArrayList<Double>) listy.clone();
@@ -544,6 +551,9 @@ public class MainActivity extends AppCompatActivity {
         }
         return returnThis;
     }
+    /*
+    This function is a rudimentary stemmer that truncates words at punctuation.
+     */
     private String [] processText(String text){
         text = text.toLowerCase();
         String realTitle = "";
@@ -553,11 +563,9 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 realTitle += text.charAt(i);
             }
-
         }
         String[] keywords = realTitle.split(" ");
         return keywords;
-
     }
 
     private void populate_vectors(){
@@ -574,15 +582,12 @@ public class MainActivity extends AppCompatActivity {
                     //Log.e("TAG", title.charAt(i) +" is not in " + delimiters);
                     realTitle += title.charAt(i);
                 }
-
             }
             String[] keywords = realTitle.split(" ");
-
             //Now that we have the vectors, we will build the inverted index
             for (int i = 0; i < keywords.length; i++) {
                 String word = keywords[i];
                 if (inverted_index.containsKey(word)) {
-
                     if (inverted_index.containsKey(idNum)) {
                         inverted_index.get(word).get(idNum).add(valueOf(i));
                     } else {
@@ -597,9 +602,7 @@ public class MainActivity extends AppCompatActivity {
                     Map<String, ArrayList<Integer>> tempy = new HashMap<String, ArrayList<Integer>>();
                     tempy.put(idNum, temp);
                     inverted_index.put(word, tempy);
-
                 }
-
             }
         }
         Log.e("MainActivity", inverted_index.toString());
