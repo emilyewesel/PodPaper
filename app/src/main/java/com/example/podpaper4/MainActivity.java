@@ -369,13 +369,67 @@ public class MainActivity extends AppCompatActivity {
         return dotProducts;
     }
 
+    private double findEditDistance(String word1, String word2){
+        double [] [] matrix = new double[word1.length() + 1][word2.length() +1];
+        for (int i = 0; i < word1.length(); i ++){
+            for (int j = 0; j <word2.length(); j ++){
+                matrix[i][j] = 0;
+            }
+        }
+
+        for (int i = 0; i <word2.length()+1; i++) {
+            matrix[word1.length()][i] = i;
+        }
+
+        for (int i = 0; i < word1.length()+1; i++) {
+            matrix[i][0] = word1.length() - i;
+        }
+
+        for (int i =1; i < word2.length() + 1; i++) {
+            for (int j = 1; j < word1.length() + 1; j++) {
+                double sub = matrix[word1.length() - j + 1][i - 1];
+                if(word1.charAt(j - 1) != word2.charAt(i - 1)) {
+                    sub += 2;
+                }
+                double e1 = matrix[word1.length() - j + 1][i] + 1;
+                double e2 = matrix[word1.length() - j][i - 1]+ 1;
+
+                ArrayList<Double> poss = new ArrayList<>();
+                poss.add(sub);
+                poss.add(e1);
+                poss.add(e2);
+
+
+                matrix[word1.length() - j][i] =  Collections.min(poss);
+            }
+        }
+        String matrixx = "";
+        for (int i =0; i < matrix.length; i ++){
+            for (int j = 0; j < matrix[i].length; j++){
+                matrixx += matrix[i][j] + " ";
+            }
+            matrixx += "\n";
+        }
+
+        Log.e("the matrix iss ", matrixx);
+        return matrix[0][word2.length()];
+    }
+
     private ArrayList<Podcast> rank_documents(String query){
+
         String [] wordsInQuery = processText(query);
 
+        Set<String> wordsSeen = inverted_index.keySet();
         Map<String, Integer> wordCount = new HashMap<String, Integer>();
 
         for (int i = 0; i < wordsInQuery.length; i++) {
             String word = wordsInQuery[i];
+            if (!inverted_index.containsKey(word)){
+                word = findClosestWord(word);
+            }
+
+
+
             if (wordCount.containsKey(word)){
                 wordCount.put(word, valueOf(wordCount.get(word).intValue() +1));
             }
@@ -398,10 +452,13 @@ public class MainActivity extends AppCompatActivity {
         for (int i = 0; i < keyArray.length; i++){
             String word = keyArray[i];
             for (int j = 0; j < podcasts.size(); j ++){
+                Log.e("the keys are", inverted_index.keySet().toString());
+
+
                 //Log.e("inverted index at word is ", "" + inverted_index.get(word).toString());
                 //Log.e("and the id number is ", "" +podcasts.get(j).getObjectId() + "the podcasts array is " + podcasts.toString());
                 if(inverted_index.containsKey(word) && inverted_index.get(word).containsKey(podcasts.get(j).getObjectId())) {
-                    Log.e("now we are ", "adding to the tf idf");
+                    Log.e("now we are ", "adding to the tf idf with the word " + word + wordCount.keySet());
                     double tf_idf = getTFIDFValue(word, podcasts.get(j).getObjectId());
                     double tfQ = 1 + Math.log10(wordCount.get(word));
                     if(tf_idf * tfQ > 0) {
@@ -427,6 +484,25 @@ public class MainActivity extends AppCompatActivity {
         return getKMostRelevant(list, 3);
 
     }
+
+    private String findClosestWord(String fakeWord) {
+        String bestWord = fakeWord;
+        double bestDistance = 99999999;
+        Set<String> realWords = inverted_index.keySet();
+        Log.e("the REAL keys are", inverted_index.keySet().toString());
+        for (String word : realWords){
+            double editDistance = findEditDistance(fakeWord, word);
+            Log.e("The word ", word + " has an edit disatnace of " + editDistance);
+            if (editDistance < bestDistance){
+                bestDistance = editDistance;
+                bestWord = word;
+            }
+
+        }
+        Log.e("The best word is ", bestWord);
+        return bestWord;
+    }
+
     private ArrayList<Podcast> getKMostRelevant(ArrayList<Double> listy, int numDesired){
         ArrayList<Podcast> returnThis = new ArrayList<Podcast>();
         ArrayList<Double> listyy = (ArrayList<Double>) listy.clone();
@@ -495,7 +571,7 @@ public class MainActivity extends AppCompatActivity {
                 if (delimiters.indexOf(title.charAt(i)) != -1) {
                     realTitle += " ";
                 } else {
-                    Log.e("TAG", title.charAt(i) +" is not in " + delimiters);
+                    //Log.e("TAG", title.charAt(i) +" is not in " + delimiters);
                     realTitle += title.charAt(i);
                 }
 
