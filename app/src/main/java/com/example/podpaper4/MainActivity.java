@@ -130,8 +130,8 @@ public class MainActivity extends AppCompatActivity {
                                         pod.setUri(track.uri);
                                         //Here we can save the podcast into the database if we choose to do so.
                                 boolean contains = false;
-                                for (Podcast podd: podcasts){
-                                    if(podd.getTitle().equals(pod.getTitle())){
+                                for (Podcast pod2: podcasts){
+                                    if(pod2.getTitle().equals(pod.getTitle())){
                                         contains = true;
                                     }
                                 }
@@ -155,7 +155,6 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
-
     public void handleSearch(View view){
         podcasts.clear();
         podcasts.addAll(masterPodcasts);
@@ -168,14 +167,10 @@ public class MainActivity extends AppCompatActivity {
         mAdapter.notifyDataSetChanged();
     }
     private void queryPods() {
-        // specify what type of data we want to query - Podcast.class
         ParseQuery<Podcast> query = ParseQuery.getQuery(Podcast.class);
-        // include data referred by user key
         query.include(Podcast.KEY_TITLE);
         query.include(Podcast.KEY_USER);
-        // limit query to latest 20 items
         query.setLimit(20);
-        // order posts by creation date (newest first)
         query.addDescendingOrder("createdAt");
         // start an asynchronous call for posts
         query.findInBackground(new FindCallback<Podcast>() {
@@ -199,7 +194,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /*
-    This function iterates through the podcasts
+    This function iterates through the podcasts and gives each one a vector of scores based on content.
      */
     private void populate_feature_scores() {
         for (int i =0; i < masterPodcasts.size(); i ++){
@@ -230,12 +225,11 @@ public class MainActivity extends AppCompatActivity {
             scores.put("foreignScore", foreignScore);
             scores.put("newsScore", newsScore);
             featureScores.put(masterPodcasts.get(i).getObjectId(), scores);
-
         }
     }
 
     /*
-    Using the podcasts that the user
+    Using the podcasts that the user has saved a picture with, this function guesses a vector to denote the user's preferences.
      */
     private void populate_user_preferences(){
         Set<String> keys = userPreferences.keySet();
@@ -250,9 +244,9 @@ public class MainActivity extends AppCompatActivity {
 
     public void handleFYP(View view){
         ArrayList<Double> finalScores = getDotProducts();
-        ArrayList<Podcast> podss =  getFYP(finalScores, 4);
+        ArrayList<Podcast> podGuesses =  getKMostRelevant(finalScores, 4, true);
         podcasts.clear();
-        podcasts.addAll(podss);
+        podcasts.addAll(podGuesses);
         mAdapter.notifyDataSetChanged();
     }
 
@@ -273,10 +267,12 @@ public class MainActivity extends AppCompatActivity {
         return dotProducts;
     }
 
+    /*
+    This function is part of the search feature and it computes the tf-idf score for each document based on the query.
+     */
     private ArrayList<Podcast> rank_documents(String query){
         String [] wordsInQuery = processText(query);
         Map<String, Integer> wordCount = new HashMap<String, Integer>();
-
         for (int i = 0; i < wordsInQuery.length; i++) {
             String word = wordsInQuery[i];
             if (!inverted_index.containsKey(word)){
@@ -289,12 +285,10 @@ public class MainActivity extends AppCompatActivity {
                 wordCount.put(word, 1);
             }
         }
-
         double [] documentScores = new double [podcasts.size()];
         for (int i =0; i < documentScores.length; i ++){
             documentScores[i] = 0;
         }
-
         Set<String> keys = wordCount.keySet();
         String [] keyArray = new String[keys.size()];
         int k = 0;
@@ -305,11 +299,9 @@ public class MainActivity extends AppCompatActivity {
             String word = keyArray[i];
             for (int j = 0; j < podcasts.size(); j ++){
                 if(inverted_index.containsKey(word) && inverted_index.get(word).containsKey(podcasts.get(j).getObjectId())) {
-                    Log.e("now we are ", "adding to the tf idf with the word " + word + wordCount.keySet());
                     double tf_idf = getTFIDFValue(word, podcasts.get(j).getObjectId());
                     double tfQ = 1 + Math.log10(wordCount.get(word));
                     if(tf_idf * tfQ > 0) {
-                        Log.e("TAG", "the word " + word + " is in the podcast " + podcasts.get(j).getTitle());
                         documentScores[j] += tf_idf * tfQ;
                     }
                 }
@@ -320,58 +312,46 @@ public class MainActivity extends AppCompatActivity {
             documentScoresDoubles[i] = new Double(documentScores[i]);
         }
         ArrayList<Double> list = new ArrayList<>(Arrays.asList(documentScoresDoubles));
-        return getKMostRelevant(list, 3);
+        return getKMostRelevant(list, 3, false);
     }
 
     /*
-    Used for finding the podcasts best suited to a search term, this function takes the precomputed
-    scores and returns the best podcasts to display to the user searching.
+    Used for finding the podcasts best suited to a search term or a for you page
+    this function takes the precomputed scores and returns the best podcasts to display to the user.
      */
-    private ArrayList<Podcast> getKMostRelevant(ArrayList<Double> listy, int numDesired){
+    private ArrayList<Podcast> getKMostRelevant(ArrayList<Double> listy, int numDesired, boolean isFYP){
         ArrayList<Podcast> returnThis = new ArrayList<Podcast>();
-        ArrayList<Double> listyy = (ArrayList<Double>) listy.clone();
-        for (int i =0; i < numDesired; i++){
+        ArrayList<Double> scores = (ArrayList<Double>) listy.clone();
+        for (int i = 0; i < numDesired; i++){
             double highestScore = 0;
             int highestIndex = 0;
-            for (int j = 0; j <listyy.size(); j ++){
-                if (listyy.get(j) >= highestScore){
+            for (int j = 0; j <scores.size(); j ++){
+                if (scores.get(j) >= highestScore){
                     highestIndex = j;
-                    highestScore = listyy.get(j);
+                    highestScore = scores.get(j);
                 }
             }
-            returnThis.add(podcasts.get(highestIndex));
-            listyy.remove(highestIndex);
+            if(isFYP) {
+                returnThis.add(masterPodcasts.get(highestIndex));
+            }
+            else{
+                returnThis.add(podcasts.get(highestIndex));
+            }
+            scores.remove(highestIndex);
         }
         return returnThis;
     }
 
-    /*
-    This function populates the for you page by finding the podcasts with the highest predicted rating.
-     */
-    private ArrayList<Podcast> getFYP(ArrayList<Double> listy, int numDesired){
-        ArrayList<Podcast> returnThis = new ArrayList<Podcast>();
-        ArrayList<Double> listyy = (ArrayList<Double>) listy.clone();
-        for (int i =0; i < numDesired; i++){
-            double highestScore = 0;
-            int highestIndex = 0;
-            for (int j = 0; j <listyy.size(); j ++){
-                if (listyy.get(j) >= highestScore){
-                    highestIndex = j;
-                    highestScore = listyy.get(j);
-                }
-            }
-            returnThis.add(masterPodcasts.get(highestIndex));
-            listyy.remove(highestIndex);
-        }
-        return returnThis;
-    }
 
+    /*
+    This function populates the inverted index by iterating through the documents and counting where each word appears.
+    example: pasta: {doc 1:{1, 2, 3}, doc 2: {2, 3,5}}
+     */
     private void populate_vectors(){
-        //pasta: {doc 1:{1, 2, 3}, doc 2: {2, 3,5}}
         //Putting the title of a podcast into a vector of words
-        for (Podcast poddd: podcasts) {
-            String [] keywords = processText(poddd.getTitle());
-            String idNum = poddd.getObjectId();
+        for (Podcast pod2: podcasts) {
+            String [] keywords = processText(pod2.getTitle());
+            String idNum = pod2.getObjectId();
             //Now that we have the vectors, we will build the inverted index
             for (int i = 0; i < keywords.length; i++) {
                 String word = keywords[i];
