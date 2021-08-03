@@ -24,7 +24,6 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.PodPaper4">
-        <activity android:name=".SearchActivity"></activity>
 
         <meta-data
             android:name="com.parse.SERVER_URL"
