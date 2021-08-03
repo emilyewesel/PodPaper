@@ -72,20 +72,25 @@ Week 1: The most important goal of this week is to get the spotify API up and ru
 - [x] User can log in and log out
 - [x] User can view a reasonably-sized subset of examples using GET requests from the Spotify API
 
-Week 2: Integrate use of the Camera and make the UI look like a newspaper
+Week 2: Add a variety of useful features
 - [x] User can click on a podcast for a more detailed view of information about the podcast
 - [x] User can take pictures using the camera
 - [x] These pictures can be saved with a podcast
+- [x] User can double tap to like podcasts
+- [x] Integrate external library for visual effects (Lottie)
+- [x] Images fade in when displayed
+- [x] Integration with Parse
+- [x] User can log in and log out 
 
-Week 3: The experience of using the app is more personalized
-- [ ] Users can save a podcast and view saved podcasts in a separate screen
-- [ ] Use item-item filtering to predict what podcast a user wants to listen to
-- [ ] In general, make the UI look more like a newspaper
+Week 3: Implement stretch features using more advanced algorithms
+- [x] For you page: Use item-item filtering to predict what podcast a user wants to listen to
+- [x] Design and compute custom scores to determine vectors for podcasts
+- [x] Search: use tf-idf computations to determine the most relevant podcasts 
+- [x] Use levenshtein edit distance to guess the intention of a mispelled word 
+- [x] Populate the database with a more robust set of podcasts
 
 Week 4: Additional Features
-- [x] User can like on podcasts
-- [ ] User can search podcasts and find one that relates to their interests
-- [ ] User can click on an author and see more of the podcasts that the author has created
+- [x] Decompose functions and improve the readability of the code
 
 ### [BONUS] Digital Wireframes & Mockups
 
