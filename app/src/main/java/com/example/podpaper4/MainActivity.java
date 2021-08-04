@@ -23,6 +23,7 @@ import com.spotify.android.appremote.api.ConnectionParams;
 import com.spotify.android.appremote.api.Connector;
 import com.spotify.android.appremote.api.SpotifyAppRemote;
 import com.spotify.protocol.types.Track;
+
 import java.util.ArrayList;
 
 import java.io.ByteArrayOutputStream;
@@ -30,8 +31,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.example.podpaper4.utils.findClosestWord;
-import static com.example.podpaper4.utils.processText;
+import static com.example.podlibrary.FindBestWord.findClosestWord;
+import static com.example.podlibrary.SimpleStemmer.processText;
+//import static com.example.podpaper4.utils.findClosestWord;
 import static java.lang.Integer.valueOf;
 
 public class MainActivity extends AppCompatActivity {
